@@ -1,5 +1,7 @@
 pragma solidity ^0.5.0;
 
+//import "github.com/Arachnid/solidity-stringutils/strings.sol";
+
 contract Ownable {
     address public owner;
 
@@ -965,3 +967,55 @@ contract Token721 is ERC721Token, Ownable {
     }
 }
 
+contract EstateFactory is Token721 {
+    
+    //등록된 부동산에 대한 보증 상태
+    //enum Assurence { yes, no }
+
+    string baseURI;
+
+    //부동산에 대한 구조체
+    struct Estate{
+        string  estateOwner;   //부동산 소유주 이름
+        string  estateName;     //부동산 명
+        string  estateAddr;     //부동산 주소
+        uint    estateSize;     //부동산 크기
+        bool    assurance;      //보증   
+    }
+
+    //부동산 구조체를 담는 배열
+    Estate[] private estates;
+    mapping(uint => address) estatesOwner;
+    mapping(uint => bool) estatesApproval;
+
+    event NewApplyEstate(uint _id, string _estateNumber, string _estateName, string _estateAddr);
+
+    //부동산 등록 신청
+    function applyEstate(string memory _owner, string memory _name, string memory _addr, uint _size) public {
+        uint id = estates.push(Estate(_owner, _name, _addr, _size, false));
+        estatesOwner[id] = msg.sender;
+        estatesApproval[id] = false;
+        emit NewApplyEstate(id, _owner, _name, _addr);
+    }
+
+    //부동산 721토큰 생성
+    function createEstate(uint _id) private onlyOwner {
+        require(estatesApproval[_id] == false);
+        _mint(owner, _id);
+        //_setTokenURI(_id, baseURI.toSlice().concat(uintToString(_id).toSlice()));
+        estatesApproval[_id]=true;
+        transferFrom(owner, estatesOwner[_id], _id);
+    }
+   
+    function burn(uint256 _tokenId) onlyOwnerOf(_tokenId) public {
+        _burn(ownerOf(_tokenId), _tokenId);
+    }
+
+    function setTokenURI(uint256 tokenId, string memory uri) onlyOwner public {
+        _setTokenURI(tokenId, uri);
+    }
+    
+    function setTokenInfoURIBase(string memory _uri) onlyOwner public {
+        baseURI = _uri;
+    }
+}
