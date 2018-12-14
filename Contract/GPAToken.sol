@@ -218,6 +218,9 @@ contract ERC20 is IERC20 {
     }
 }
 
+/**
+ * @title GPAToken( Global Property Auction Token)
+ */
 contract GPAToken is ERC20 {
 
     string public constant name = "GlobalPropertyAuctionToken"; // solium-disable-line uppercase
