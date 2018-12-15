@@ -1,6 +1,7 @@
 pragma solidity ^0.5.0;
 
 //import "github.com/Arachnid/solidity-stringutils/strings.sol";
+import "./SafeMath.sol";
 
 contract Ownable {
     address public owner;
@@ -32,6 +33,7 @@ contract Ownable {
     }
 }
 
+/*
 library SafeMath {
     function mul(uint256 a, uint256 b) internal pure returns (uint256) {
         if (a == 0) {
@@ -60,6 +62,7 @@ library SafeMath {
         return c;
     }
 }
+*/
 
 /**
  * @title ERC165
@@ -889,8 +892,6 @@ contract ERC721Token is ERC721, ERC721BasicToken {
     }
 
 
-
-
     /**
     * @dev Internal function to mint a new token
     * @dev Reverts if the given token ID already exists
@@ -967,6 +968,7 @@ contract Token721 is ERC721Token, Ownable {
     }
 }
 
+
 contract EstateFactory is Token721 {
     
     //등록된 부동산에 대한 보증 상태
@@ -998,6 +1000,7 @@ contract EstateFactory is Token721 {
         emit NewApplyEstate(id, _owner, _name, _addr);
     }
 
+
     //부동산 721토큰 생성
     function createEstate(uint _id) private onlyOwner {
         require(estatesApproval[_id] == false);
@@ -1018,4 +1021,5 @@ contract EstateFactory is Token721 {
     function setTokenInfoURIBase(string memory _uri) onlyOwner public {
         baseURI = _uri;
     }
+    
 }
