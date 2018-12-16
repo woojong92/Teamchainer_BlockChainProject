@@ -4,24 +4,27 @@ import "./EstateFactory.sol";
 import "./GPAToken.sol";
 import "./Ownable.sol";
 
-contract AuctionFactory{
+contract AuctionFactory is Ownable{
 
     EstateFactory public estateFactory;
     GPAToken public gpaToken;
 
+    address public manager;
+
     constructor(EstateFactory _estateFactory, GPAToken _token) public {
+        manager = msg.sender;
         estateFactory = EstateFactory(_estateFactory);
         gpaToken = GPAToken(_token);
     }
-
     
     EstateAuction[] private estateAuctions;     //EstateAuction 컨트랙트의 주소값을 담는 배열
     mapping(uint => address) estateAuctionOwner;    //EstateAuction컨트랙트 소유자 주소 맵핑
-    mapping(address => bool) checkEstateAuctionOwner;   //EstateAution컨트랙트 생성 여부를 확인하기 위한 맵핑
+    
+    //mapping(address => bool) checkEstateAuctionOwner;   //EstateAution컨트랙트 생성 여부를 확인하기 위한 맵핑
 
     //EstateAuction 컨트랙트 생성
     function createAuction() public {
-        EstateAuction newEstateAuction = new EstateAuction(msg.sender);
+        EstateAuction newEstateAuction = new EstateAuction(manager, msg.sender, estateFactory, gpaToken);
         uint id = estateAuctions.push(newEstateAuction);
         estateAuctionOwner[id] = msg.sender;
     }
@@ -31,13 +34,20 @@ contract AuctionFactory{
         return estateAuctions;
     }
 
+    /*
     //이전에 사용자가 EstateAuction 컨트랙트를 만들었는지 검사
     function getCheckEstateAuctionOwner() public view returns(bool) {
         return checkEstateAuctionOwner[msg.sender];
     }
+    */
 }
 
-contract EstateAuction is Ownable{
+
+
+contract EstateAuction{
+
+    EstateFactory public estateFactory;
+    GPAToken public gpaToken;
     
     //Auction 구조체
     struct Auction {
@@ -47,19 +57,25 @@ contract EstateAuction is Ownable{
         uint currentPrice;
         uint startTime;
         uint endTime;
+        bool finishAuction;
         bool complete;
-        mapping(address => uint) auctioneer; //옥션참가자의 참가금액
+        mapping(address => uint) auctioneerPrice;   //옥션참가자의 참가 토큰개수
+        mapping(uint => address) auctioneer;    //낙찰 순서대로 맵핑
     }
 
     //Auction 구조체를 담는 배열
     Auction[] auctions;
     
-    //EstateAuction 컨트랙트 Owner 주소
-    address public manager;
+    
+    address public manager;     //AuctionFactory 컨트랙트 Owner 
+    address public host;    //EstateAuction 컨트랙트 Owner 
 
     //EstateAuction 생성자
-    constructor(address _manager) public {
+    constructor(address _manager, address _host, EstateFactory _estateFactory, GPAToken _gpaToken) public {
         manager = _manager;
+        host = _host;
+        estateFactory = _estateFactory;
+        gpaToken = _gpaToken;
     }
 
     /*
@@ -80,6 +96,7 @@ contract EstateAuction is Ownable{
             currentPrice : 0,
             startTime : now,
             endTime : _endTime,
+            finishAuction : false,
             complete : false
         });
 
@@ -99,7 +116,7 @@ contract EstateAuction is Ownable{
     modifier checkPrice(uint _auctionId, uint _auctionPrice) {
         
         require(
-            cnaPrice(_auctionId, _auctionPrice),
+            canPrice(_auctionId, _auctionPrice),
             "This price is low than current price"  
         );
         _;
@@ -116,6 +133,10 @@ contract EstateAuction is Ownable{
         return  _auctionPrice > _auction.currentPrice ;
     }
 
+    //fallback 함수
+    function() external payable{
+
+    }
 
     //Auction 참가하기
     function joinAuction(
@@ -128,7 +149,7 @@ contract EstateAuction is Ownable{
         returns(bool)
     {
         Auction storage _auction = auctions[_auctionId];
-        _auction.auctioneer[msg.sender] = _auctionPrice;
+        _auction.auctioneerPrice[msg.sender] = _auctionPrice;
         return true;
     }
 
@@ -138,13 +159,37 @@ contract EstateAuction is Ownable{
     }
 
     //Auction 참가 종료시키기
-    function closingAution() public {
-
+    function closingAution(uint _auctionId) public returns(bool) {
+        Auction storage _auction = auctions[_auctionId];
+        if( !canParticipate(_auctionId) ) {
+            _auction.finishAuction = true;
+            return true; //Auction 참가 기간 종료 
+        } else {
+            return false; //Auction 참가 기간 미종료
+        }    
     }
 
     //거래 완료
-    function completeAuction() public {
-
+    function completeAuction(uint _auctionId) public returns(bool) {
+        Auction storage _auction = auctions[_auctionId];
+        _auction.complete = true;
+        return true;
     }
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
