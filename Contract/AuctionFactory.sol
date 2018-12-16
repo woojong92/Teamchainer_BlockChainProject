@@ -2,6 +2,7 @@ pragma solidity ^0.5.0;
 
 import "./EstateFactory.sol";
 import "./GPAToken.sol";
+import "./Ownable.sol";
 
 contract AuctionFactory{
 
