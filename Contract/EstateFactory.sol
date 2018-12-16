@@ -2,7 +2,9 @@ pragma solidity ^0.5.0;
 
 //import "github.com/Arachnid/solidity-stringutils/strings.sol";
 import "./SafeMath.sol";
+import "./Ownable.sol";
 
+/*
 contract Ownable {
     address public owner;
 
@@ -32,6 +34,7 @@ contract Ownable {
         owner = address(0);
     }
 }
+*/
 
 /*
 library SafeMath {
