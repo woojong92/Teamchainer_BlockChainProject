@@ -1004,7 +1004,8 @@ contract EstateFactory is Token721 {
     }
 
 
-    //부동산 721토큰 생성
+    //부동산 721토큰 발행 후
+    //신청한 사용자에게 transfer
     function createEstate(uint _id) private onlyOwner {
         require(estatesApproval[_id] == false);
         _mint(owner, _id);
