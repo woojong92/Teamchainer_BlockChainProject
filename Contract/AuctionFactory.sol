@@ -28,7 +28,7 @@ contract AuctionFactory {
     function createAuction() public {
         EstateAuction newEstateAuction = new EstateAuction(manager, msg.sender, estateFactory, gpaToken);
         uint id = estateAuctions.push(newEstateAuction);
-        estateAuctionOwner[id] = msg.sender;
+        estateAuctionOwner[id] = msg.sender; //
     }
 
     //생성된 EstateAuction 컨트랙트의 주소값을 배열 형태로 반환
@@ -103,8 +103,6 @@ contract EstateAuction is Ownable {
     }
 
 
-
-
     //Auction 참가하기
     function joinAuction()  public payable inParticipationTime() returns(bool)  {
         Auction storage _auction = auction;
@@ -137,14 +135,27 @@ contract EstateAuction is Ownable {
         require(finishAuction, "Auction is not finished.");
         //상위 3명을 제외한 사람들의 토큰 순차적으로 돌려주기
         for (uint i = 0 ; i < auctioneerCount; i++ ){
-            transfer(to, value);// ??? HOW???
+            //transfer(to, value);// ??? HOW???
         }
     }
 
+    address finalAuctioneer;
+
+    function setFinalAuctioneer() public returns(bool) {
+        finalAuctioneer = auctioneer[auctioneer.length-1];
+    }
 
     // multi-sig ?
     function consensus() public {
-    
+        
+
+
+    }
+
+    function tradingEstate() public returns(bool) {
+
+        gpaToken.transferFrom(msg.sender, getOwnerOfToken(_tokeId), _price); //임시
+        estateFactory.transferFrom(getOwnerOfToken(_tokeId), msg.sender, _price);// 임시
     }
 
     //Auction 참가 종료시키기
@@ -166,7 +177,7 @@ contract EstateAuction is Ownable {
         _;
     }
 
-    //참여가능한 옥션인지 확인하는 함수
+    //옥션이 진행중에 있는지 확인하는 함수
     function canParticipate() public view returns (bool) {
         Auction memory _auction = auction;
         if( now >= _auction.startTime && now <= _auction.endTime ) {
