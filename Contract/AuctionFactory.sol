@@ -3,12 +3,14 @@ pragma solidity ^0.5.0;
 import "./EstateFactory.sol";
 import "./GPAToken.sol";
 import "./Ownable.sol";
+import "./SafeMath.sol";
 
-contract AuctionFactory is Ownable{
+contract AuctionFactory {
 
     EstateFactory public estateFactory;
     GPAToken public gpaToken;
 
+    //manager : AuctionFactorry Owner
     address public manager;
 
     constructor(EstateFactory _estateFactory, GPAToken _token) public {
@@ -44,27 +46,31 @@ contract AuctionFactory is Ownable{
 
 
 
-contract EstateAuction{
+contract EstateAuction is Ownable {
+
+    using SafeMath for uint256;
 
     EstateFactory public estateFactory;
     GPAToken public gpaToken;
     
     //Auction 구조체
     struct Auction {
-        string description;
-        uint estateId;
-        uint firstPrice;
-        uint currentPrice;
-        uint startTime;
-        uint endTime;
-        bool finishAuction;
-        bool complete;
-        mapping(address => uint) auctioneerPrice;   //옥션참가자의 참가 토큰개수
-        mapping(uint => address) auctioneer;    //낙찰 순서대로 맵핑
+        string description; //설명
+        uint estateId;  //
+        uint firstPrice; //최초 시작가
+        uint currentPrice;  //현재 낙찰가   
+        uint startTime; //옥션 시작시간
+        uint endTime;   //옥션 마감시간
+        bool finishAuction; //옥션 마감 확인
+        bool complete;  //옥션 거래 완료
     }
 
+    mapping(address => uint) participationPrice;   //옥션참가자의 참가 토큰개수
+    mapping(uint => address) auctioneer;    //낙찰 순서대로 맵핑
+    uint auctioneerCount;
+
     //Auction 구조체를 담는 배열
-    Auction[] auctions;
+    Auction auction;
     
     
     address public manager;     //AuctionFactory 컨트랙트 Owner 
@@ -78,6 +84,11 @@ contract EstateAuction{
         gpaToken = _gpaToken;
     }
 
+    //fallback 함수
+    function() external payable{
+
+    }
+
     /*
     function getSummary() public view returns (uint, uint, uint) {
         return (
@@ -89,7 +100,7 @@ contract EstateAuction{
 
     //Auction 생성
     function createAuction(string memory _description, uint _estateId, uint _firstPrice, uint _endTime) public {
-        Auction memory newAuction = Auction({
+        auction = Auction({
             description : _description,
             estateId : _estateId,
             firstPrice : _firstPrice,
@@ -100,58 +111,49 @@ contract EstateAuction{
             complete : false
         });
 
-        auctions.push(newAuction);
+        //auctions.push(newAuction);
     }
 
     //참여가능한 옥션인가?
-    modifier inParticipationTime(uint _auctionId) {
+    modifier inParticipationTime() {
         require(
-            canParticipate(_auctionId),
+            canParticipate(),
             "This Auction is finished."
         );
         _;
     }
 
-    //옥션 참가 금액이 현재 낙찰가보다 높은가?
-    modifier checkPrice(uint _auctionId, uint _auctionPrice) {
-        
-        require(
-            canPrice(_auctionId, _auctionPrice),
-            "This price is low than current price"  
-        );
-        _;
-    }
-
     //참여가능한 옥션인지 확인하는 함수
-    function canParticipate(uint _auctionId) public view returns (bool) {
-        Auction memory _auction = auctions[_auctionId];
+    function canParticipate() public view returns (bool) {
+        Auction memory _auction = auction;
         return now >= _auction.startTime && now <= _auction.endTime;
     }
 
-    function canPrice(uint _auctionId, uint _auctionPrice) public view returns (bool){
-        Auction memory _auction = auctions[_auctionId];
-        return  _auctionPrice > _auction.currentPrice ;
-    }
-
-    //fallback 함수
-    function() external payable{
-
-    }
-
     //Auction 참가하기
-    function joinAuction(
-        uint _auctionId, 
-        uint _auctionPrice
-        ) 
-        public 
-        inParticipationTime(_auctionId) 
-        checkPrice(_auctionId, _auctionPrice)
-        returns(bool)
-    {
-        Auction storage _auction = auctions[_auctionId];
-        _auction.auctioneerPrice[msg.sender] = _auctionPrice;
-        return true;
+    function joinAuction()  public payable inParticipationTime() returns(bool)  {
+        Auction storage _auction = auction;
+        if( msg.value > _auction.currentPrice){
+            participationPrice[msg.sender] = msg.value;
+            auctioneer[auctioneerCount] = msg.sender;
+            auctioneerCount.add(1);
+            _auction.currentPrice = msg.sender;
+            return true;
+        } else {
+            return false;
+        }
     }
+
+    /*
+    function becomeRichest() public payable returns (bool) {
+        if (msg.value > mostSent) {
+            pendingWithdrawals[richest] += msg.value;
+            richest = msg.sender;
+            mostSent = msg.value;
+            return true;
+        } else {
+            return false;
+        }
+    }*/
 
     // multi-sig ?
     function consensus() public {
@@ -159,9 +161,9 @@ contract EstateAuction{
     }
 
     //Auction 참가 종료시키기
-    function closingAution(uint _auctionId) public returns(bool) {
-        Auction storage _auction = auctions[_auctionId];
-        if( !canParticipate(_auctionId) ) {
+    function closingAution() public returns(bool) {
+        Auction storage _auction = auction;
+        if( !canParticipate() ) {
             _auction.finishAuction = true;
             return true; //Auction 참가 기간 종료 
         } else {
@@ -170,8 +172,8 @@ contract EstateAuction{
     }
 
     //거래 완료
-    function completeAuction(uint _auctionId) public returns(bool) {
-        Auction storage _auction = auctions[_auctionId];
+    function completeAuction() public onlyOwner returns(bool) {
+        Auction storage _auction = auction;
         _auction.complete = true;
         return true;
     }
