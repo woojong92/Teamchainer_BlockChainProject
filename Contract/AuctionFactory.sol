@@ -13,10 +13,10 @@ contract AuctionFactory {
     //manager : AuctionFactorry Owner
     address public manager;
 
-    constructor(EstateFactory _estateFactory, GPAToken _token) public {
+    constructor(EstateFactory _estateFactory, GPAToken _gpaToken) public {
         manager = msg.sender;
         estateFactory = EstateFactory(_estateFactory);
-        gpaToken = GPAToken(_token);
+        gpaToken = GPAToken(_gpaToken);
     }
     
     EstateAuction[] private estateAuctions;     //EstateAuction 컨트랙트의 주소값을 담는 배열
@@ -26,7 +26,7 @@ contract AuctionFactory {
 
     //EstateAuction 컨트랙트 생성
     function createAuction() public {
-        EstateAuction newEstateAuction = new EstateAuction(manager, msg.sender, estateFactory, gpaToken);
+        EstateAuction newEstateAuction = new EstateAuction(manager, msg.sender, estateFactory, gpaToken); //msg.sender: Auction 사용자의 주소
         uint id = estateAuctions.push(newEstateAuction);
         estateAuctionOwner[id] = msg.sender; //
     }

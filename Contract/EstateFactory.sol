@@ -988,12 +988,12 @@ contract EstateFactory is Token721 {
         bool    assurance;      //보증   
     }
 
-    //부동산 구조체를 담는 배열
-    Estate[] private estates;
-    mapping(uint => address) estatesOwner;
-    mapping(uint => bool) estatesApproval;
+    
+    Estate[] private estates;   //부동산 구조체를 담는 배열
+    mapping(uint => address) estatesOwner;  //부동산 등록을 신청한 사용자를 순차적으로 저장
+    mapping(uint => bool) estatesApproval;  //신청한 부동산을 토큰으로 발행했는지 여부
 
-    event NewApplyEstate(uint _id, string _estateNumber, string _estateName, string _estateAddr);
+    event NewApplyEstate(uint _id, string _estateOwner, string _estateName, string _estateAddr);
 
     //부동산 등록 신청
     function applyEstate(string memory _owner, string memory _name, string memory _addr, uint _size) public {
@@ -1018,8 +1018,8 @@ contract EstateFactory is Token721 {
         _burn(ownerOf(_tokenId), _tokenId);
     }
 
-    function setTokenURI(uint256 tokenId, string memory uri) onlyOwner public {
-        _setTokenURI(tokenId, uri);
+    function setTokenURI(uint256 _tokenId, string memory _uri) onlyOwner public {
+        _setTokenURI(_tokenId, _uri);
     }
     
     function setTokenInfoURIBase(string memory _uri) onlyOwner public {
