@@ -13,7 +13,6 @@ contract Ownable {
         address indexed previousOwner,
         address indexed newOwner
     );
-
     constructor() public {
         owner = msg.sender;
     }
