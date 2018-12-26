@@ -1,21 +1,17 @@
 var express = require('express');
+var http = require('http');
+var path = require('path');
+
+//express 미들웨어 불러오기
+var bodyParser = require('body-parser');
+var static = require('serve-static');
+var expressSession = require('express-session');
+
+//express 객체 생성
 var app = express();
 
-var bodyParser = require('body-parser');
-
-//view engin
-var handlebars = require('express-handlebars').create({ 
-    defaultLayout:'main',
-    helpers: { //세션
-        section: function(name, options){
-            if(!this._sections) this._sections = {};
-            this._sections[name] = options.fn(this);
-            return null;
-        }
-    }
-});
-app.engine('handlebars', handlebars.engine);
-app.set('view engine', 'handlebars');
+//라우터 객체 참조
+var router = express.Router();
 
 
 
@@ -26,7 +22,84 @@ app.set('port', process.env.PORT || 3000);
 app.use(bodyParser.urlencoded({extend: false}));
 app.use(bodyParser.json());
 
+app.use(static(path.join(__dirname, 'public')));
 
+app.use(expressSession({
+    secret:'my key',
+    resave:true,
+    saveUninitialized:true
+}));
+
+//view engin
+var handlebars = require('express-handlebars').create({ 
+    defaultLayout:'main',
+    /*
+    helpers: { //세션
+        section: function(name, options){
+            if(!this._sections) this._sections = {};
+            this._sections[name] = options.fn(this);
+            return null;
+        }
+    }*/
+});
+app.engine('handlebars', handlebars.engine);
+app.set('view engine', 'handlebars');
+
+
+//미들웨어에서 파라미터 확인
+/*
+app.use(function(req, res, next){
+    console.log('미들웨어 파라미터 확인.');
+
+    var paramId = req.body.id || req.query.id;
+    var paramPassword = req.body.password || req.query.password;
+
+    res.writeHead('200', {'Content-Type': 'text/html;charset=utf8'});
+    res.write('<div><p>Id: ' + paramId + '</p></div>');
+    res.write('<div><p>password: '+ paramPassword+ '</p></div>')
+    res.end();
+})
+*/
+
+//라우터 함수 등록
+//router.route('/process/login').get()
+router.route('/process/login').post(function(req, res){
+    console.log('/process/login 처리');
+
+    var paramId = req.body.id || req.query.id;
+    var paramPassword = req.body.password || req.query.password;
+
+    if(req.session.user){
+        //이미 로그인된 상태
+        console.log('이미 로그인됨');
+        res.redirect('/public/product.html');
+    }else{
+        //세션 저장
+        req.session.user = {
+            id: paramId,
+            name: '소녀시대',
+            authorized: true
+        }
+    }
+
+    res.writeHead('200', {'Content-Type': 'text/html;charset=utf8'});
+    res.write('<div><p>Id: ' + paramId + '</p></div>');
+    res.write('<div><p>password: '+ paramPassword+ '</p></div>');
+    res.end();
+});
+
+router.route('process/product').get(function(req, res){
+    console.log('/process/product 호출됨.');
+
+    if(req.session.user){
+        res.redirect('/public/product.html');
+    }else{
+        res.redirect('public/login.html');
+    }
+})
+
+//라우터 객체를 app 객체에 등록
+app.use('/', router);
 
 //res.locals.ratials 객체에 주입할 미들웨어
 app.use(function(req, res, next){
