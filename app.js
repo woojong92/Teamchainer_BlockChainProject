@@ -1,3 +1,4 @@
+//Express 기본 모듈 불러오기
 var express = require('express');
 var http = require('http');
 var path = require('path');
@@ -85,8 +86,30 @@ router.route('/process/login').post(function(req, res){
     res.writeHead('200', {'Content-Type': 'text/html;charset=utf8'});
     res.write('<div><p>Id: ' + paramId + '</p></div>');
     res.write('<div><p>password: '+ paramPassword+ '</p></div>');
+    res.write('<a href="http://localhost:3000/product.html">프로덕트 페이지</a>')
     res.end();
 });
+
+router.route('/process/logout').get(function(req, res){
+    console.log('/process/logout 호출됨.');
+
+    if(req.session.user) {
+        //로그인된 상태
+        console.log('로그아웃 합니다.');
+
+        req.session.destroy(function(err) {
+            if(err) {throw err;}
+
+            console.log('세션을 삭제하고 로그아웃되었습니다.');
+            res.redirect('/login.html');
+        });
+    } else {
+        //로그인 안된 상태
+        console.log('아직 로그인되어 있지 않습니다.');
+        res.redirect('/login.html');
+    }
+});
+
 
 router.route('process/product').get(function(req, res){
     console.log('/process/product 호출됨.');
