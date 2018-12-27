@@ -14,7 +14,28 @@ var app = express();
 //라우터 객체 참조
 var router = express.Router();
 
+//몽고디비 모듈 사용
+var MongoClient = requrie('mongodb').MongoClient;
 
+//데이터베이스 객체를 위한 변수 선언
+var database;
+
+//데이터페이스에 연결
+function connectDB() {
+    //데이터베이스 연결 정보
+    //mongodb://%IP정보%:%포트정보%/%데이터베이스이름%
+    var databaseUrl = 'mongodb://localhost:27017/local';
+
+    //데이터베이스 연결
+    MongoClient.connect(databaseUrl, function(err, db){
+        if(err) throw err;
+
+        console.log('데이터베이스에 연결되었습니다. : ' + databaseUrl);
+        
+        //database 변수에 할당.
+        database = db;
+    });
+}
 
 //기본 속성 설정
 app.set('port', process.env.PORT || 3000);
@@ -64,6 +85,7 @@ app.use(function(req, res, next){
 
 //라우터 함수 등록
 //router.route('/process/login').get()
+/*
 router.route('/process/login').post(function(req, res){
     console.log('/process/login 처리');
 
@@ -89,6 +111,7 @@ router.route('/process/login').post(function(req, res){
     res.write('<a href="http://localhost:3000/product.html">프로덕트 페이지</a>')
     res.end();
 });
+*/
 
 router.route('/process/logout').get(function(req, res){
     console.log('/process/logout 호출됨.');
@@ -144,6 +167,40 @@ app.get('/login', function(req, res){
     res.render('login');
 })
 
+app.post('/process/login', function(req, res){
+    console.log('process/login 호출됨');
+
+    var paramId = req.param('id');
+    var paramPassword = req.param('password');
+
+    if(database) {
+        authUser(database, paramId, paramPassword, function(err, docs) {
+            if(err) {throw err;}
+
+            if(docs){
+                console.dir(docs);
+
+                res.writeHead('200', {'Content-Type': 'text/html;charset=utf8'});
+                res.write('<h1>로그인 성공</h1>')
+                res.write('<div><p>Id: ' + paramId + '</p></div>');
+                res.write('<div><p>password: '+ paramPassword+ '</p></div>');
+                res.write('<a href="/public/login.html">다시 로그인하기</a>');
+                res.end();
+            }else {
+                res.writeHead('200', {'Content-Type': 'text/html;charset=utf8'});
+                res.write('<h1>로그인 실패</h1>');
+                res.write('<div><p>아이디와 비밀번호를 다시 확인하라</p></div>');
+                res.write('<a href="/public/login.html">다시 로그인하기</a>');
+                res.end();                
+            }
+        });
+    } else {
+        res.writeHead('200', {'Content-Type': 'text/html;charset=utf8'});
+        res.write('<h1>데이터베이스 연결 실패</h1>');
+        res.end(); 
+    }
+});
+
 
 // 커스텀 404 페이지
 app.use(function(req, res){
@@ -161,6 +218,9 @@ app.use(function(err, req, res, next){
 app.listen(app.get('port'), function(){
     console.log('Express started on http://localhost:' +
         app.get('port')+'; press Ctrl-C to terminate.')
+
+    //데이터베이스 연결
+    connectDB();
 });
 
 function getWeatherData(){
@@ -191,3 +251,23 @@ function getWeatherData(){
     };
 }
 
+//사용자 인증하는 함수
+var authUser = function(database, id, password, callback){
+    console.log('authUser 호출됨.');
+
+    //users 컬렉션 참조
+    var users = database.collection('users');
+
+    //아이디와 비밀번호를 사용해 검색
+    users.find({"id": id, "password": password}).toArray(function(err, docs){
+        if(err) {
+            callback(err, null);
+            return;
+        } 
+
+        if(docs.length > 0) {
+            console.log('아이디 [%s], 비밀번호 [%s]가 일치하는 사용자 참음.', id, password);
+            callback(null, null);
+        }
+    });
+}
