@@ -3,6 +3,7 @@ var express = require('express');
 var http = require('http');
 var path = require('path');
 
+
 //express 미들웨어 불러오기
 var bodyParser = require('body-parser');
 var static = require('serve-static');
@@ -17,10 +18,21 @@ var router = express.Router();
 //몽고디비 모듈 사용
 var MongoClient = require('mongodb').MongoClient;
 
+//mongoose 모듈 불러오기
+var mongoose = require('mongoose');
+
 //데이터베이스 객체를 위한 변수 선언
 var database;
 
-//데이터페이스에 연결
+//데이터베이스 스키마 객체를 위한 변수 선언
+var UserSchema;
+
+//데이터베이스 모델 객체를 위한 변수 선언
+var UserModel;
+
+
+//데이터페이스에 연결1
+/*
 function connectDB() {
     //데이터베이스 연결 정보
     //mongodb://%IP정보%:%포트정보%/%데이터베이스이름%
@@ -35,6 +47,42 @@ function connectDB() {
         //database 변수에 할당.
         database = db.db('local');
     });
+}
+*/
+//데이터베이스 연결2- moongoose
+function connectDB() {
+    //데이터베이스 연결 정보
+    //mongodb://%IP정보%:%포트정보%/%데이터베이스이름%
+    var databaseUrl = 'mongodb://localhost:27017/local';
+    
+    //데이터베이스 연결
+    console.log('데이터베이스 연결을 시도합니다.');
+    mongoose.Promise = global.Promise;
+    mongoose.connect(databaseUrl);
+    database = mongoose.connection;
+
+    database.on('error', console.error.bind(console, 'mongoose connection error.'));
+    database.on('open', function() {
+        console.log('데이터베이스에 연결되었습니다. : ' + databaseUrl);
+
+        //스키마 정의
+        UserSchema = mongoose.Schema({
+            id: String,
+            name: String,
+            password: String
+        });
+        console.log('UserSchema 정의함.')
+
+        //UserModel 모델 정의
+        UserModel = mongoose.model("users", UserSchema);
+        console.log("UserModel 정의 함.");
+    });
+
+    database.on('disconnected', function(){
+        console.log('연결이 끊어졌습니다. 5초 후 다시 연결합니다.');
+        setInterval(connectDB, 5000);
+    });
+    
 }
 
 //기본 속성 설정
@@ -257,7 +305,8 @@ function getWeatherData(){
 
 
 
-//사용자 인증하는 함수
+//사용자 인증하는 함수1
+/*
 var authUser = function(database, id, password, callback){
     console.log('authUser 호출됨.');
 
@@ -276,6 +325,34 @@ var authUser = function(database, id, password, callback){
             callback(null, docs);
         } else {
             console.log("일치하는 사용자 찾지 못함.");
+            callback(null, null);
+        }
+    });
+}
+*/
+
+//사용자 인증하는 함수2
+var authUser = function(database, id, password, callback){
+    console.log('authUser 호출됨: ' + id + ', ' + password);
+
+    //users 컬렉션 참조
+    var users = database.collection('users');
+    
+    //아이디와 비밀번호를 사용해 검색
+    UserModel.find({"id" : id, "password" : password}, function(err, results) {
+        if(err) {
+            callback(err, null);
+            return;
+        }
+
+        console.log('아이디 [%s], 비밀번호 [%s]로 사용자 검색 결과', id, password);
+        console.dir(results);
+
+        if(results.length > 0) {
+            console.log('일치하는 사용자 찾음.' , id, password);
+            callback(null, results);
+        } else {
+            console.log('일치하는 사용자를 찾지 못함.');
             callback(null, null);
         }
     });
