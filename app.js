@@ -33,6 +33,11 @@ var UserModel;
 //crypto 모듈 불러들이기
 var crypto = require('crypto');
 
+//web3 모듈 불러들이기
+var Web3 = require('web3');
+
+var user = require('./routes/user');
+
 
 //데이터페이스에 연결1
 /*
@@ -51,7 +56,6 @@ function connectDB() {
         database = db.db('local');
     });
 }*/
-
 
 //데이터베이스 연결2- moongoose
 /*
@@ -166,6 +170,7 @@ function connectDB() {
 }
 
 // user 스키마 및 모델 객체 생성
+/*
 function createUserSchema() {
 
     // 스키마 정의
@@ -241,7 +246,21 @@ function createUserSchema() {
     //UserModel 모델 정의
     UserModel = mongoose.model("users3", UserSchema);
     console.log("UserModel 정의 함.");
+}
+*/
 
+// user 스키마 및 모델 객체 생성 - 모듈화
+function createUserSchema() {
+
+    // 스키마 정의
+    UserSchema = require('./database/user_schema').createSchema(mongoose);
+
+    //UserModel 모델 정의
+    UserModel = mongoose.model("users3", UserSchema);
+    console.log("UserModel 정의 함.");
+
+    //init 호출
+    user.init(database, UserSchema, UserModel);
 }
 
 //기본 속성 설정
@@ -274,6 +293,12 @@ var handlebars = require('express-handlebars').create({
 app.engine('handlebars', handlebars.engine);
 app.set('view engine', 'handlebars');
 
+
+router.route('/process/login').post(user.login);
+router.route('/process/adduser').post(user.adduser);
+router.route('/process/listuser').post(user.listuser);
+
+/*
 app.post('/process/login', function(req, res){
     console.log('process/login 호출됨');
 
@@ -390,6 +415,8 @@ router.route('/process/listuser').post(function(req, res) {
         res.end();        
     }
 });
+*/
+
 
 //미들웨어에서 파라미터 확인
 /*
@@ -515,6 +542,7 @@ app.listen(app.get('port'), function(){
     //데이터베이스 연결
     connectDB();
 });
+
 
 function getWeatherData(){
     return {

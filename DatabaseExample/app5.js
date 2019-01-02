@@ -44,7 +44,7 @@ var UserSchema;
 //데이터베이스 모델 객체를 위한 변수 선언
 var UserModel;
 
-//데이터베이스 연결- moongoose2
+//데이터베이스 연결- password crypto
 function connectDB() {
     //데이터베이스 연결 정보
     //mongodb://%IP정보%:%포트정보%/%데이터베이스이름%
@@ -62,32 +62,6 @@ function connectDB() {
 
         // user 스키마 및 모델 객체 생성
         createUserSchema();
-
-        /*
-        //스키마 정의
-        UserSchema = mongoose.Schema({
-            id: {type: String, required: true, unique: true},
-            password: {type: String, required: true},
-            name: {type: String, index: 'hashed'},
-            age: {type: Number, 'default': -1},
-            created_at : {type: Date, index: {unique: false}, 'default': Date.now},
-            updated_at : {type: Date, index: {unique: false}, 'default': Date.now}
-        });
-
-        UserSchema.static('findById', function(id, callback) {
-            return this.find({id: id}, callback);
-        });
-
-        UserSchema.static('findAll', function(callback){
-            return this.find({ }, callback);
-        });
-
-        console.log('UserSchema 정의함.')
-
-        //UserModel 모델 정의
-        UserModel = mongoose.model("users2", UserSchema);
-        console.log("UserModel 정의 함.");
-        */
     });
 
     database.on('disconnected', function(){
@@ -102,10 +76,10 @@ function createUserSchema() {
     // 스키마 정의
     // password를 hashed_password로 변경, default 속성 모두 추가, salt 속성 추가
     UserSchema = mongoose.Schema({
-        id: {type: String, required: true, unique: true},
+        id: {type: String, required: true, unique: true, 'default': ' '},
         hashed_password : {type: String, required: true, 'default': ' '},
         salt : {type: String, required: true},
-        name: {type: String, index: 'hashed', 'default':''},
+        name: {type: String, index: 'hashed', 'default':' '},
         age: {type: Number, 'default': -1},
         created_at : {type: Date, index: {unique: false}, 'default': Date.now},
         updated_at : {type: Date, index: {unique: false}, 'default': Date.now}
@@ -124,7 +98,7 @@ function createUserSchema() {
 
     //스키마에 모델 인스턴스에서 사용할 수 있는 메소드 추가
     //비밀번호 암호화 메소드
-    UserSchema.method('encryptPssword', function(plainText, inSalt) {
+    UserSchema.method('encryptPassword', function(plainText, inSalt) {
         if(inSalt) {
             return crypto.createHmac('sha1', inSalt).update(plainText).digest('hex');
         } else {
@@ -133,12 +107,12 @@ function createUserSchema() {
     });
 
     // salt 값 만들기 메소드
-    UserModel.Schema.method('makeSalt', function() {
-        return Math.round
+    UserSchema.method('makeSalt', function() {
+        return Math.round((new Date().valueOf * Math.random())) + '';
     });
 
     // 인증 메소드 - 입력된 비밀번호와 비교 (true/false 리턴)
-    UserSchema.method('authenticate', function(plainTxt, inSalt, hashed_password) {
+    UserSchema.method('authenticate', function(plainText, inSalt, hashed_password) {
         if(inSalt) {
             console.log('authenticate 호출됨 : %s -> %s: %s', plainText, 
                         this.encryptPassword(plainText, inSalt), hashed_password);
@@ -158,6 +132,21 @@ function createUserSchema() {
     UserSchema.path('name').validate(function(name) {
         return name.length;
     }, 'name 칼럼의 값이 없습니다.')
+
+    UserSchema.static('findById', function(id, callback) {
+        return this.find({id: id}, callback);
+    });
+
+    UserSchema.static('findAll', function(callback){
+        return this.find({ }, callback);
+    });
+
+    console.log('UserSchema 정의함.')
+
+    //UserModel 모델 정의
+    UserModel = mongoose.model("users3", UserSchema);
+    console.log("UserModel 정의 함.");
+
 }
 
 //로그인 라우팅 함수 - 데이터베이스의 정보와 비교
@@ -336,7 +325,7 @@ var authUser = function(database, id, password, callback){
 
 //사용자를 추가하는 함수
 var addUser = function(database, id, password, name, callback) {
-    console.log('addUser 호출됨.');
+    console.log('addUser 호출됨 : ' + id + ', ' + password + ', ' + name);
 
     //UserModel의 인스턴스 생성
     var user = new UserModel({"id": id, "password": password, "name": name});

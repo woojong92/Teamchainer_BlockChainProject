@@ -1,109 +1,17 @@
-//Express 기본 모듈 불러오기
-var express = require('express');
-var http = require('http');
-var path = require('path');
-
-
-//express 미들웨어 불러오기
-var bodyParser = require('body-parser');
-var static = require('serve-static');
-var expressSession = require('express-session');
-
-//express 객체 생성
-var app = express();
-
-//라우터 객체 참조
-var router = express.Router();
-
-//몽고디비 모듈 사용
-var MongoClient = require('mongodb').MongoClient;
-
-//mongoose 모듈 불러오기
-var mongoose = require('mongoose');
-
-//데이터베이스 객체를 위한 변수 선언
 var database;
-
-//데이터베이스 스키마 객체를 위한 변수 선언
 var UserSchema;
-
-//데이터베이스 모델 객체를 위한 변수 선언
 var UserModel;
 
-//crypto 모듈 불러들이기
-var crypto = require('crypto');
+var init = function(db, schema, model) {
+    console.log('init 호출됨.');
 
-
-//데이터베이스 연결- password crypto
-function connectDB() {
-    //데이터베이스 연결 정보
-    //mongodb://%IP정보%:%포트정보%/%데이터베이스이름%
-    var databaseUrl = 'mongodb://localhost:27017/local';
-    
-    //데이터베이스 연결
-    console.log('데이터베이스 연결을 시도합니다.');
-    mongoose.Promise = global.Promise;
-    mongoose.connect(databaseUrl);
-    database = mongoose.connection;
-
-    database.on('error', console.error.bind(console, 'mongoose connection error.'));
-    database.on('open', function() {
-        console.log('데이터베이스에 연결되었습니다. : ' + databaseUrl);
-
-        // user 스키마 및 모델 객체 생성
-        createUserSchema();
-    });
-
-    database.on('disconnected', function(){
-        console.log('연결이 끊어졌습니다. 5초 후 다시 연결합니다.');
-        setInterval(connectDB, 5000);
-    });
+    database = db;
+    UserSchema = schema;
+    UserModel = model;
 }
 
-
-// user 스키마 및 모델 객체 생성 - 모듈화
-function createUserSchema() {
-
-    // 스키마 정의
-    UserSchema = require('./database/user_schema').createSchema(mongoose);
-
-    //UserModel 모델 정의
-    UserModel = mongoose.model("users3", UserSchema);
-    console.log("UserModel 정의 함.");
-}
-
-//기본 속성 설정
-app.set('port', process.env.PORT || 3000);
-
-//body-parser 설정
-app.use(bodyParser.urlencoded({extend: false}));
-app.use(bodyParser.json());
-
-app.use(static(path.join(__dirname, 'public')));
-
-app.use(expressSession({
-    secret:'my key',
-    resave:true,
-    saveUninitialized:true
-}));
-
-//view engin
-var handlebars = require('express-handlebars').create({ 
-    defaultLayout:'main',
-    /*
-    helpers: { //세션
-        section: function(name, options){
-            if(!this._sections) this._sections = {};
-            this._sections[name] = options.fn(this);
-            return null;
-        }
-    }*/
-});
-app.engine('handlebars', handlebars.engine);
-app.set('view engine', 'handlebars');
-
-app.post('/process/login', function(req, res){
-    console.log('process/login 호출됨');
+var login = function(req, res) {
+    console.log('user 모듈 안에 있는 login 호출됨');
 
     var paramId = req.body.id;// req.param('id');
     var paramPassword = req.body.password; //req.param('password');
@@ -134,12 +42,10 @@ app.post('/process/login', function(req, res){
         res.write('<h1>데이터베이스 연결 실패</h1>');
         res.end(); 
     }
-});
+}
 
-
-//사용자 추가 라우팅 함수 - 클라이언트에서 보내온 데이터를 이용해 데이터베이스에 추가
-router.route('/process/adduser').post(function(req, res) {
-    console.log('/process/adduser 호출됨.');
+var adduser = function(req, res) {
+    console.log('user 모듈 안에 있는 adduser 호출됨.');
 
     var paramId = req.body.id || req.query.id;
     var paramPassword = req.body.password || req.query.password;
@@ -170,11 +76,10 @@ router.route('/process/adduser').post(function(req, res) {
         res.write('<h1>데이터베이스 연결 실패</h1>');
         res.end();        
     }
-})
+}
 
-//사용자 리스트 함수
-router.route('/process/listuser').post(function(req, res) {
-    console.log('/process/listuser 호출됨.');
+var listuser = function(req, res) {
+    console.log('user 모듈 안에 있는 listuser 호출됨.');
 
     //데이터베이스 객체가 초기화된 경우, 모델 객체의 findAll 메소드 호출
     if(database) {
@@ -217,67 +122,7 @@ router.route('/process/listuser').post(function(req, res) {
         res.write('<h1>데이터베이스 연결 실패</h1>');
         res.end();        
     }
-});
-
-
-router.route('/process/logout').get(function(req, res){
-    console.log('/process/logout 호출됨.');
-
-    if(req.session.user) {
-        //로그인된 상태
-        console.log('로그아웃 합니다.');
-
-        req.session.destroy(function(err) {
-            if(err) {throw err;}
-
-            console.log('세션을 삭제하고 로그아웃되었습니다.');
-            res.redirect('/login.html');
-        });
-    } else {
-        //로그인 안된 상태
-        console.log('아직 로그인되어 있지 않습니다.');
-        res.redirect('/login.html');
-    }
-});
-
-
-router.route('process/product').get(function(req, res){
-    console.log('/process/product 호출됨.');
-
-    if(req.session.user){
-        res.redirect('/public/product.html');
-    }else{
-        res.redirect('public/login.html');
-    }
-})
-
-
-//라우터 객체를 app 객체에 등록
-app.use('/', router);
-
-
-// 커스텀 404 페이지
-app.use(function(req, res){
-    res.status(404);
-    res.render('404');
-});
-
-// 커스텀 500 페이지
-app.use(function(err, req, res, next){
-    console.error(err.stack);
-    res.status(500);
-    res.render('500')
-});
-
-app.listen(app.get('port'), function(){
-    console.log('Express started on http://localhost:' +
-        app.get('port')+'; press Ctrl-C to terminate.')
-
-    //데이터베이스 연결
-    connectDB();
-});
-
-
+}
 
 //사용자 인증하는 함수: 아이디로 먼저 찾고 비밀번호를 그 다음에 비교
 var authUser = function(database, id, password, callback){
@@ -333,3 +178,8 @@ var addUser = function(database, id, password, name, callback) {
         callback(null, user);
     });
 };
+
+module.exports.init = init;
+module.exports.login = login;
+module.exports.adduser = adduser;
+module.exports.listuser = listuser;
