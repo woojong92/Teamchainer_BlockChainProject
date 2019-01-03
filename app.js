@@ -285,14 +285,13 @@ app.use(expressSession({
 //view engin
 var handlebars = require('express-handlebars').create({ 
     defaultLayout:'main',
-    /*
     helpers: { //세션
         section: function(name, options){
             if(!this._sections) this._sections = {};
             this._sections[name] = options.fn(this);
             return null;
         }
-    }*/
+    }
 });
 app.engine('handlebars', handlebars.engine);
 app.set('view engine', 'handlebars');
@@ -502,7 +501,7 @@ router.route('process/product').get(function(req, res){
 //라우터 객체를 app 객체에 등록
 app.use('/', router);
 
-//res.locals.ratials 객체에 주입할 미들웨어
+//res.locals.patials 객체에 주입할 미들웨어
 app.use(function(req, res, next){
     if(!res.locals.partials) res.locals.partials={};
     res.locals.partials.weatherContext = getWeatherData();
@@ -518,9 +517,11 @@ app.get('/about', function(req, res){
     res.render('about');
 });
 
+
 app.get('/login', function(req, res){
     res.render('login');
 })
+
 
 
 
@@ -748,3 +749,21 @@ var addUser = function(database, id, password, name, callback) {
         callback(null, user);
     });
 };
+
+function sessionCheck() {
+    if(req.session.user) {
+        //로그인된 상태
+        console.log('로그인 되어있음.');
+
+        req.session.destroy(function(err) {
+            if(err) {throw err;}
+
+            console.log('세션을 삭제하고 로그아웃되었습니다.');
+            res.redirect('/login.html');
+        });
+    } else {
+        //로그인 안된 상태
+        console.log('아직 로그인되어 있지 않습니다.');
+        res.redirect('/login.html');
+    }
+}

@@ -141,11 +141,11 @@ contract EstateAuction is Ownable {
     }
 
     // multi-sig ?
+    /*
     function consensus() public {
-        
-
 
     }
+    */
 
 
     //서로 승인하고 거래하기
