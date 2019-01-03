@@ -34,8 +34,12 @@ var UserModel;
 var crypto = require('crypto');
 
 //web3 모듈 불러들이기
-var Web3 = require('web3');
 
+var Web3 = require('web3');
+// use the given Provider, e.g in Mist, or instantiate a new websocket provider
+var web3 = new Web3(Web3.givenProvider || 'ws://localhost:8545');
+
+//유저 관련 모듈 불러들이기
 var user = require('./routes/user');
 
 
@@ -660,7 +664,9 @@ var authUser = function(database, id, password, callback){
             callback(null, null);
         }
     });
-}*/
+}
+*/
+
 
 //사용자 인증하는 함수: 아이디로 먼저 찾고 비밀번호를 그 다음에 비교
 var authUser = function(database, id, password, callback){
