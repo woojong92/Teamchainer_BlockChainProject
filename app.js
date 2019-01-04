@@ -6,6 +6,7 @@ var path = require('path');
 //express 미들웨어 불러오기
 var bodyParser = require('body-parser');
 var static = require('serve-static');
+var cookieParser = require('cookie-parser');
 var expressSession = require('express-session');
 
 //express 객체 생성
@@ -496,12 +497,14 @@ router.route('process/product').get(function(req, res){
     }
 })
 
+var isRight;
 
 //라우터 객체를 app 객체에 등록
 app.use('/', router);
 
 //res.locals.patials 객체에 주입할 미들웨어
 app.use(function(req, res, next){
+    
     if(!res.locals.partials) res.locals.partials={};
     res.locals.partials.weatherContext = getWeatherData();
     next();
@@ -509,6 +512,7 @@ app.use(function(req, res, next){
 
 
 app.get('/', function(req, res){
+
     res.render('home');
 });
 
@@ -541,6 +545,7 @@ app.listen(app.get('port'), function(){
     //데이터베이스 연결
     connectDB();
 });
+
 
 
 function getWeatherData(){
