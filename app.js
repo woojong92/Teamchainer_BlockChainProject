@@ -3,7 +3,6 @@ var express = require('express');
 var http = require('http');
 var path = require('path');
 
-
 //express 미들웨어 불러오기
 var bodyParser = require('body-parser');
 var static = require('serve-static');
@@ -278,14 +277,14 @@ app.use(static(path.join(__dirname, 'public')));
 
 app.use(expressSession({
     secret:'my key',
-    resave:true,
+    resave:true, //resave: 요청이 바뀌지 않았어도 세션 정보를 강제로 다시 저장한다.
     saveUninitialized:true
 }));
 
 //view engin
 var handlebars = require('express-handlebars').create({ 
     defaultLayout:'main',
-    helpers: { //세션
+    helpers: { //섹션
         section: function(name, options){
             if(!this._sections) this._sections = {};
             this._sections[name] = options.fn(this);
@@ -517,15 +516,10 @@ app.get('/about', function(req, res){
     res.render('about');
 });
 
-
+/*
 app.get('/login', function(req, res){
     res.render('login');
-})
-
-
-
-
-
+})*/
 
 // 커스텀 404 페이지
 app.use(function(req, res){
@@ -670,6 +664,7 @@ var authUser = function(database, id, password, callback){
 
 
 //사용자 인증하는 함수: 아이디로 먼저 찾고 비밀번호를 그 다음에 비교
+/*
 var authUser = function(database, id, password, callback){
     console.log('authUser 호출됨.');
 
@@ -703,6 +698,7 @@ var authUser = function(database, id, password, callback){
         }
     });
 }
+*/
 
 //사용자를 추가하는 함수
 /*
@@ -732,6 +728,7 @@ var addUser = function(database, id, password, name, callback) {
 */
 
 //사용자를 추가하는 함수2- mongoose
+/*
 var addUser = function(database, id, password, name, callback) {
     console.log('addUser 호출됨 : ' + id + ', ' + password + ', ' + name);
 
@@ -749,7 +746,9 @@ var addUser = function(database, id, password, name, callback) {
         callback(null, user);
     });
 };
+*/
 
+/*
 function sessionCheck() {
     if(req.session.user) {
         //로그인된 상태
@@ -766,4 +765,4 @@ function sessionCheck() {
         console.log('아직 로그인되어 있지 않습니다.');
         res.redirect('/login.html');
     }
-}
+}*/

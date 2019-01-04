@@ -16,6 +16,20 @@ var login = function(req, res) {
     var paramId = req.body.id;// req.param('id');
     var paramPassword = req.body.password; //req.param('password');
 
+    if(req.session.user){
+        //이미 로그인된 상태
+        console.log('이미 로그인됨');
+        return res.redirect('/');
+    }else{
+        //세션 저장
+        req.session.user = {
+            id: paramId,
+            name: '소녀시대',
+            authorized: true
+        }
+        console.log(req.session.user);
+    }
+
     if(database) {
         authUser(database, paramId, paramPassword, function(err, docs) {
             if(err) {throw err;}
