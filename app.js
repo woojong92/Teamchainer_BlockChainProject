@@ -282,6 +282,24 @@ app.use(expressSession({
     saveUninitialized:true
 }));
 
+//라우터 객체를 app 객체에 등록
+app.use('/', router);
+
+//res.locals.patials 객체에 주입할 미들웨어
+app.use(function(req, res, next){
+    
+    if(!res.locals.partials) res.locals.partials={};
+    res.locals.partials.weatherContext = getWeatherData();
+    next();
+});
+
+// res.locals is an object passed to hbs engine
+app.use(function(req, res, next) {
+    res.locals.session = req.session;
+    next();
+});
+
+
 //view engin
 var handlebars = require('express-handlebars').create({ 
     defaultLayout:'main',
@@ -300,6 +318,7 @@ app.set('view engine', 'handlebars');
 router.route('/process/login').post(user.login);
 router.route('/process/adduser').post(user.adduser);
 router.route('/process/listuser').post(user.listuser);
+router.route('/process/logout').get(user.logout);
 
 /*
 app.post('/process/login', function(req, res){
@@ -466,6 +485,7 @@ router.route('/process/login').post(function(req, res){
 });
 */
 
+/*
 router.route('/process/logout').get(function(req, res){
     console.log('/process/logout 호출됨.');
 
@@ -477,14 +497,15 @@ router.route('/process/logout').get(function(req, res){
             if(err) {throw err;}
 
             console.log('세션을 삭제하고 로그아웃되었습니다.');
-            res.redirect('/login.html');
+            res.redirect('/');
         });
     } else {
         //로그인 안된 상태
         console.log('아직 로그인되어 있지 않습니다.');
-        res.redirect('/login.html');
+        res.redirect('/');
     }
 });
+*/
 
 
 router.route('process/product').get(function(req, res){
@@ -499,16 +520,6 @@ router.route('process/product').get(function(req, res){
 
 var isRight;
 
-//라우터 객체를 app 객체에 등록
-app.use('/', router);
-
-//res.locals.patials 객체에 주입할 미들웨어
-app.use(function(req, res, next){
-    
-    if(!res.locals.partials) res.locals.partials={};
-    res.locals.partials.weatherContext = getWeatherData();
-    next();
-});
 
 
 app.get('/', function(req, res){

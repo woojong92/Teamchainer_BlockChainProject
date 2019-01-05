@@ -41,20 +41,42 @@ var login = function(req, res) {
                 res.write('<h1>로그인 성공</h1>')
                 res.write('<div><p>Id: ' + paramId + '</p></div>');
                 res.write('<div><p>password: '+ paramPassword+ '</p></div>');
-                res.write('<a href="/login.html">다시 로그인하기</a>');
+                res.write('<a href="/">Home으로</a>');
                 res.end();
             }else {
+            
                 res.writeHead('200', {'Content-Type': 'text/html;charset=utf8'});
                 res.write('<h1>로그인 실패</h1>');
                 res.write('<div><p>아이디와 비밀번호를 다시 확인하라</p></div>');
-                res.write('<a href="/login.html">다시 로그인하기</a>');
-                res.end();                
+                res.write('<a href="/">Home으로</a>');
+                res.end();          
+                   
             }
         });
     } else {
         res.writeHead('200', {'Content-Type': 'text/html;charset=utf8'});
         res.write('<h1>데이터베이스 연결 실패</h1>');
         res.end(); 
+    }
+}
+
+var logout = function(req, res) {
+    console.log('/process/logout 호출됨.');
+
+    if(req.session.user) {
+        //로그인된 상태
+        console.log('로그아웃 합니다.');
+
+        req.session.destroy(function(err) {
+            if(err) {throw err;}
+
+            console.log('세션을 삭제하고 로그아웃되었습니다.');
+            return res.redirect('/');
+        });
+    } else {
+        //로그인 안된 상태
+        console.log('logout error.');
+        return res.redirect('/');
     }
 }
 
@@ -195,5 +217,6 @@ var addUser = function(database, id, password, name, callback) {
 
 module.exports.init = init;
 module.exports.login = login;
+module.exports.logout = logout;
 module.exports.adduser = adduser;
 module.exports.listuser = listuser;
