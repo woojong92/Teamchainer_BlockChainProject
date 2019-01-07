@@ -96,7 +96,7 @@ router.route('/process/adduser').post(function(req, res) {
 
     //데이터베이스 객체가 초기화된 경우, addUser 함수 호추하여 사용자 추가
     if(database) {
-        addUser(database, paramId, paramName, function(req, res){
+        addUser(database, paramId, paramPassword, paramName, function(err, result){
             if(err) {throw err;}
 
             //결과 객체 확인하여 추가된 데이터가 있으면 성공 응답 전송

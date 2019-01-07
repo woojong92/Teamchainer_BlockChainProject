@@ -1002,7 +1002,6 @@ contract EstateFactory is Token721 {
         emit NewApplyEstate(id, _owner, _name, _addr);
     }
 
-
     //부동산 721토큰 발행 후
     //신청한 사용자에게 transfer
     function createEstate(uint _id) public {

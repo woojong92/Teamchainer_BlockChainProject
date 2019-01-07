@@ -45,7 +45,6 @@ contract AuctionFactory {
 }
 
 
-
 contract EstateAuction is Ownable {
 
     using SafeMath for uint256;
