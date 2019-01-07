@@ -1,9 +1,9 @@
-require('dotenv').config(); // for configuration
+const credentials = require('../credentials')// for configuration
 
-const HDWalletProvider = require('truffle-hdwallet-provider-pkey');
+const HDWalletProvider = require('truffle-hdwallet-provider');
 const Web3 = require('web3');
 
-const provider = new HDWalletProvider(process.env.PRIVATE_KEY, process.env.RPC_ADDRESS);
+const provider = new HDWalletProvider(credentials.PRIVATE_KEY, credentials.RPC_ADDRESS);
 const web3 = new Web3(provider);
 
 provider.engine.stop();
