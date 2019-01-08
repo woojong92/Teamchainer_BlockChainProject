@@ -16,6 +16,7 @@ var login = function(req, res) {
     var paramId = req.body.id;// req.param('id');
     var paramPassword = req.body.password; //req.param('password');
 
+    /*
     if(req.session.user){
         //이미 로그인된 상태
         console.log('이미 로그인됨');
@@ -24,11 +25,11 @@ var login = function(req, res) {
         //세션 저장
         req.session.user = {
             id: paramId,
-            name: '소녀시대',
             authorized: true
         }
         console.log(req.session.user);
     }
+    */
 
     if(database) {
         authUser(database, paramId, paramPassword, function(err, docs) {
@@ -36,6 +37,12 @@ var login = function(req, res) {
 
             if(docs){
                 console.dir(docs);
+
+                req.session.user = {
+                    id: paramId,
+                    authorized: true
+                }
+                console.log(req.session.user);
 
                 res.writeHead('200', {'Content-Type': 'text/html;charset=utf8'});
                 res.write('<h1>로그인 성공</h1>')
@@ -86,24 +93,27 @@ var adduser = function(req, res) {
     var paramId = req.body.id || req.query.id;
     var paramPassword = req.body.password || req.query.password;
     var paramName = req.body.name || req.query.name;
+    var paramWalletAddr = req.body.walletAddr || req.query.walletAddr;
 
-    console.log('요청 파라미터 : '+ paramId + ', ' + paramPassword + ', ' + paramName);
+    console.log('요청 파라미터 : '+ paramId + ', ' + paramPassword + ', ' + paramName +', ' + paramWalletAddr);
 
     //데이터베이스 객체가 초기화된 경우, addUser 함수 호추하여 사용자 추가
     if(database) {
-        addUser(database, paramId, paramPassword, paramName, function(err, result){
+        addUser(database, paramId, paramPassword, paramName, paramWalletAddr, function(err, result){
             if(err) {throw err;}
 
             //결과 객체 확인하여 추가된 데이터가 있으면 성공 응답 전송
-            if( result && result.insertedCount > 0 ) {
+            if( result ) {
                 console.dir(result);
 
                 res.writeHead('200', {'Content-Type': 'text/html;charset=utf8'});
                 res.write('<h1>사용자 추가 성공</h1>')
+                res.write('<a href="/">Home으로</a>');
                 res.end();
             } else {// 결과 객체가 없으면 실패 응답 전송
                 res.writeHead('200', {'Content-Type': 'text/html;charset=utf8'});
                 res.write('<h1>사용자 추가 실패</h1>')
+                res.write('<a href="/">Home으로</a>');
                 res.end();
             }
         });
@@ -197,11 +207,11 @@ var authUser = function(database, id, password, callback){
 
 
 //사용자를 추가하는 함수2- mongoose
-var addUser = function(database, id, password, name, callback) {
-    console.log('addUser 호출됨 : ' + id + ', ' + password + ', ' + name);
+var addUser = function(database, id, password, name, walletAddr, callback) {
+    console.log('addUser 호출됨 : ' + id + ', ' + password + ', ' + name + ', ' + walletAddr);
 
     //UserModel의 인스턴스 생성
-    var user = new UserModel({"id": id, "password": password, "name": name});
+    var user = new UserModel({"id": id, "password": password, "name": name, "wallet_address": walletAddr});
 
     //save()로 저장
     user.save(function(err) {

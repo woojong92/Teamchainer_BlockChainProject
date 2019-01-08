@@ -8,6 +8,7 @@ Schema.createSchema = function(mongoose) {
     // password를 hashed_password로 변경, default 속성 모두 추가, salt 속성 추가
     UserSchema = mongoose.Schema({
         id: {type: String, required: true, unique: true, 'default': ' '},
+        wallet_address: {type: String, required: true, 'default': ' '},
         hashed_password : {type: String, required: true, 'default': ' '},
         salt : {type: String, required: true},
         name: {type: String, index: 'hashed', 'default':' '},
@@ -59,6 +60,10 @@ Schema.createSchema = function(mongoose) {
     UserSchema.path('id').validate(function(id) {
         return id.length;
     }, 'id 칼럼의 값이 없습니다.');
+
+    UserSchema.path('wallet_address').validate(function(id) {
+        return id.length;
+    }, 'wallet_address 칼럼의 값이 없습니다.');
 
     UserSchema.path('name').validate(function(name) {
         return name.length;

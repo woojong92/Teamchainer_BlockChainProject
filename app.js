@@ -79,7 +79,7 @@ function createUserSchema() {
     UserSchema = require('./database/user_schema').createSchema(mongoose);
 
     //UserModel 모델 정의
-    UserModel = mongoose.model("users3", UserSchema);
+    UserModel = mongoose.model("users5", UserSchema);
     console.log("UserModel 정의 함.");
 
     //init 호출
@@ -163,6 +163,10 @@ app.get('/about', function(req, res){
 
 app.get('/signup', function(req, res) {
     res.render('signup');
+})
+
+app.get('/mypage', function(req, res) {
+    res.render('mypage');
 })
 
 /*
