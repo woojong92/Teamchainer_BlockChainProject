@@ -37,9 +37,8 @@ var crypto = require('crypto');
 
 //var Web3 = require('web3');
 // use the given Provider, e.g in Mist, or instantiate a new websocket provider
-//var web3 = new Web3(Web3.givenProvider || 'ws://localhost:8545');
 
-const web3 = require('./helpers/web3Initializer');
+//const web3 = require('./helpers/web3Initializer');
 
 
 //유저 관련 모듈 불러들이기

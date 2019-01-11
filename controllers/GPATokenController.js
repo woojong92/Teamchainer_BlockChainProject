@@ -1,82 +1,9 @@
 const ContractBuilder = require('../helpers/contractBuilder');
-const Model = require('../models/kStarCoinModel');
+const Model = require('../models/GPATokenModel');
 const { GAS_LIMIT_MULTIPLE, CONTRACTS, SUCCESS_MSG } = require('../helpers/constants');
 const model = new Model();
 
 class KStarCoinController {
-
-  async compile(req, res) {
-    let isSuccess = false;
-    let msg = SUCCESS_MSG;
-
-    try{
-      await ContractBuilder.compile(CONTRACTS['KSC'].name);
-      isSuccess = true;
-    } catch(error) {
-      console.error(error);
-      msg = error.reason;
-    } finally {
-      res.json({
-        success : isSuccess,
-        msg : msg
-      });
-    }
-
-  }
-
-  async deploy(req, res) {
-    let isSuccess = false;
-    let contractAddress;
-    let msg = SUCCESS_MSG;
-
-    try{
-      contractAddress = await ContractBuilder.deploy(CONTRACTS['KSC'].name);
-      isSuccess = true;
-    } catch(error) {
-      console.error(error);
-      msg = error;
-    } finally {
-      res.send({
-        success : isSuccess,
-        msg : msg,
-        data : {
-          deployedContract : contractAddress
-        }
-      });
-    }
-
-  }
-
-  async lockable(req, res) {
-    const lock = req.body.lock;
-    const lockMsg = req.body.lockMsg;
-
-    let isSuccess = false;
-    let msg = SUCCESS_MSG;
-    let result, gasEstimate;
-
-    try {
-      const accounts = await model.getAccounts();
-      if(lock) {
-        gasEstimate = await model.estimateGasLock(lockMsg, accounts[0]);
-        result = await model.lock(accounts[0],lockMsg, gasEstimate);
-      }else{
-        gasEstimate = await model.estimateGasUnlock(lockMsg, accounts[0]);
-        result = await model.unlock(accounts[0], lockMsg, gasEstimate);
-      }
-      isSuccess = true;
-    } catch (error) {
-        console.error(error);
-    } finally {
-        res.json({
-          success : isSuccess,
-          msg : msg,
-          data : {
-            transactionHash : result.transactionHash
-          }
-        });
-    }
-  }
 
   async getTotalSupply(req, res) {
     let isSuccess = false;
@@ -203,35 +130,7 @@ class KStarCoinController {
         });
     }
   }
-
-  // async approve(req, res) {
-  //   const from = req.body.from;
-  //   const spender = req.body.spender;
-  //   const value = req.body.value;
-  //   let isSuccess = false;
-  //   let result;
-  //   let msg = SUCCESS_MSG;
-
-  //   try {
-  //     const accounts = await model.getAccounts();
-  //     const estimatedGas = await model.estimateGasApprove(spender, value);
-  //     const gasLimit = Math.floor(estimatedGas * GAS_LIMIT_MULTIPLE);
-  //     result = await model.approve(accounts[0], from, spender, value, gasLimit);
-  //     isSuccess = true;
-  //   } catch (error) {
-  //       console.error(error);
-  //       msg = error.reason;
-  //   } finally {
-  //       res.json({
-  //             success : isSuccess,
-  //             msg : msg,
-  //             data : {
-  //               transactionHash : result.transactionHash
-  //             }
-  //       });
-  //   }
-  // }
-
+  
 }
 
 module.exports = KStarCoinController;
