@@ -991,19 +991,19 @@ contract EstateFactory is Token721 {
     Estate[] public estates;   //부동산 구조체를 담는 배열 //나중에 보안을 위해 internal로
     mapping(uint => address) estatesOwner;  //부동산 등록을 신청한 사용자를 순차적으로 저장, 토큰번호에 해당 사용자 주소저장
     mapping(uint => bool) estatesApproval;  //신청한 부동산을 토큰으로 발행했는지 여부
-    mapping(address => uint) ownerEstatesCount; // 부동산 신청 개수 저장
+    mapping(address => uint) ownerApplyEstatesCount; // 부동산 신청 개수 저장
     //bool[] estateApproval
 
 
     event NewApplyEstate(uint _id, string _estateOwner, string _estateName, string _estateAddr);
 
     //부동산 등록 신청
-    function applyEstate(string memory _owner, string memory _name, string memory _addr, uint _size) public {
-        uint id = estates.push(Estate(_owner, _name, _addr, _size, false));
-        estatesOwner[id] = _owner;
+    function applyEstate(string memory _ownerName, string memory _estateName, string memory _addr, uint _size) public {
+        uint id = estates.push(Estate(_ownerName, _estateName, _addr, _size, false))-1;
+        estatesOwner[id] = msg.sender;
         estatesApproval[id] = false;
-        ownerEstatesCount[_owner]++;
-        emit NewApplyEstate(id, _owner, _name, _addr);
+        ownerApplyEstatesCount[msg.sender]++;
+        emit NewApplyEstate(id, _ownerName, _estateName, _addr);
     }
 
     //부동산 721토큰 발행 후
@@ -1013,14 +1013,15 @@ contract EstateFactory is Token721 {
         _mint(owner, _id);
         //_setTokenURI(_id, baseURI.toSlice().concat(uintToString(_id).toSlice()));
         estatesApproval[_id]=true;
+        ownerApplyEstatesCount[estatesOwner[_id]]--;
         transferFrom(owner, estatesOwner[_id], _id);
     }
    
     //사용자가 부동산  신청 후 아직 승인되지 않은 거 반환. //
     //estatesOwner[i] -> 나중에 transfer하면 _owner를 바꿔주도록 설계해야 함.
     function getNotApprovalEstate(address _owner) public view returns(uint[] memory){
-        uint[] memory result = new uint[](ownerEstatesCount[_owner]);
-        uint length = ownerEstatesCount[_owner];
+        uint[] memory result = new uint[](ownerApplyEstatesCount[_owner]);
+        //uint length = ownerEstatesCount[_owner];
         uint cnt =0;
         for(uint i=0; i< estates.length ; i++){
             if(estatesApproval[i] == false && estatesOwner[i] == _owner){
@@ -1057,5 +1058,6 @@ contract EstateFactory is Token721 {
     function estateTransferFrom(address _from, address _to, uint256 _tokenId) public{
         transferFrom(_from, _to, _tokenId);
         estatesOwner[_tokenId] = _to;
+        
     }
 }
