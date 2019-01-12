@@ -2,4 +2,4 @@ BlockChain Project
 
 GPA Token Address: 0x27AE2362496588EA547bC801316F8958e08B2A28
 
-EstateFactory Address: 0xf652a7b2ca2718b6b7d8ab4d19b440c5216f29d2
+EstateFactory Address: "0xf824b400b3385fb86f0ca2970a66da27d7374735"

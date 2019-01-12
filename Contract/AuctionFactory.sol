@@ -21,14 +21,35 @@ contract AuctionFactory {
     
     EstateAuction[] private estateAuctions;     //EstateAuction 컨트랙트의 주소값을 담는 배열
     mapping(uint => address) estateAuctionOwner;    //EstateAuction컨트랙트 소유자 주소 맵핑
+    mapping(address => uint) ownerEstateAuctionCount; // 사용자가 만든 경매의 수 저장
     
     //mapping(address => bool) checkEstateAuctionOwner;   //EstateAution컨트랙트 생성 여부를 확인하기 위한 맵핑
 
+    event NewAuction();
+
     //EstateAuction 컨트랙트 생성
-    function createAuction() public {
-        EstateAuction newEstateAuction = new EstateAuction(manager, msg.sender, estateFactory, gpaToken); //msg.sender: Auction 사용자의 주소로 변경
-        uint id = estateAuctions.push(newEstateAuction);
-        estateAuctionOwner[id] = msg.sender; //msg.sender: Auction 사용자의 주소로 변경
+    function createAuction(address _owner) public {
+        EstateAuction newEstateAuction = new EstateAuction(manager, _owner, estateFactory, gpaToken); //msg.sender: Auction 사용자의 주소로 변경
+        uint id = estateAuctions.push(newEstateAuction)-1;
+        estateAuctionOwner[id] = _owner; 
+        ownerEstateAuctionCount[_owner]++;
+        emit NewAuction();
+    }
+
+    function getOwnerEstateAuctionCount(address _owner) public view returns(uint){
+        return ownerEstateAuctionCount[_owner];
+    }
+
+    function getAuctionByOwner(address _owner) public view returns(uint[] memory){
+        uint[] memory result = new uint[](ownerEstateAuctionCount[_owner]);
+        uint cnt = 0;
+        for(uint i=0; i<estateAuctions.length; i++){
+            if(estateAuctionOwner[i] == _owner ){
+                result[cnt] = i;
+                cnt++;
+            }
+        }
+        return result;
     }
 
     //생성된 EstateAuction 컨트랙트의 주소값을 배열 형태로 반환
@@ -36,12 +57,6 @@ contract AuctionFactory {
         return estateAuctions;
     }
 
-    /*
-    //이전에 사용자가 EstateAuction 컨트랙트를 만들었는지 검사
-    function getCheckEstateAuctionOwner() public view returns(bool) {
-        return checkEstateAuctionOwner[msg.sender];
-    }
-    */
 }
 
 
@@ -73,17 +88,17 @@ contract EstateAuction is Ownable {
     Auction auction;
     
     address public manager;     //AuctionFactory 컨트랙트 Owner 
-    address public host;    //EstateAuction 컨트랙트 Owner 
+    address public owner;    //EstateAuction 컨트랙트 Owner 
 
     //EstateAuction 생성자
-    constructor(address _manager, address _host, EstateFactory _estateFactory, GPAToken _gpaToken) public {
+    constructor(address _manager, address _owner, EstateFactory _estateFactory, GPAToken _gpaToken) public {
         manager = _manager; 
-        host = _host;
+        owner = _owner;
         estateFactory = _estateFactory; //ERC721 토큰 사용
         gpaToken = _gpaToken;   //ERC20 토큰 사용
     }
 
-    //fallback 함수?
+    //fallback 함수??
     function() external payable{
 
     }
@@ -94,7 +109,7 @@ contract EstateAuction is Ownable {
             description : _description,
             estateId : _estateId,
             firstPrice : _firstPrice,
-            currentPrice : 0,
+            currentPrice : _firstPrice-1,
             startTime : now,
             endTime : _endTime
         });
