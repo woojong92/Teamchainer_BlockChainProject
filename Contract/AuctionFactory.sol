@@ -36,10 +36,12 @@ contract AuctionFactory {
         emit NewAuction();
     }
 
+    // _owner가 생성한 옥션의 개수 반환
     function getOwnerEstateAuctionCount(address _owner) public view returns(uint){
         return ownerEstateAuctionCount[_owner];
     }
 
+    // _owner 가 생성한 옥션의 Idx 반환
     function getAuctionByOwner(address _owner) public view returns(uint[] memory){
         uint[] memory result = new uint[](ownerEstateAuctionCount[_owner]);
         uint cnt = 0;
@@ -77,18 +79,23 @@ contract EstateAuction is Ownable {
         uint endTime;   //옥션 마감시간
     }
 
-    bool finishAuction = false; //옥션 마감 확인
-    bool complete = false;  //옥션 거래 완료
+    bool finishAuction; //옥션 마감 확인
+    bool completeAuction;  //옥션 거래 완료
 
     mapping(address => uint) participationPrice;   //옥션참가자의 참가 토큰개수
     mapping(uint => address) auctioneer;    //낙찰 순서대로 맵핑
     uint auctioneerCount;
 
     //Auction 구조체를 담는 변수
-    Auction auction;
+    Auction[] public auction;
     
     address public manager;     //AuctionFactory 컨트랙트 Owner 
     address public owner;    //EstateAuction 컨트랙트 Owner 
+    address finalAuctioneer;    //최종 낙찰자
+
+    bool checkAuctioneer;
+    bool checkOwner;
+    bool checkManager;
 
     //EstateAuction 생성자
     constructor(address _manager, address _owner, EstateFactory _estateFactory, GPAToken _gpaToken) public {
@@ -98,35 +105,40 @@ contract EstateAuction is Ownable {
         gpaToken = _gpaToken;   //ERC20 토큰 사용
     }
 
-    //fallback 함수??
-    function() external payable{
-
-    }
-
     //Auction 생성
     function createAuction(string memory _description, uint _estateId, uint _firstPrice, uint _endTime) public {
-        auction = Auction({
+        //_esteteId가 owner의 것인가 검사!!
+        require(estateFactory.ownerOf(_estateId) == owner,"not owner's estateId");
+        auction.push(Auction({
             description : _description,
             estateId : _estateId,
             firstPrice : _firstPrice,
             currentPrice : _firstPrice-1,
             startTime : now,
-            endTime : _endTime
-        });
+            endTime : now + _endTime
+        }));
     }
 
 
     //Auction 참가하기
     //_price는 참가 토큰 개수
     //참가자 address?
-    function joinAuction(uint _price)  public payable inParticipationTime() returns(bool)  {
-        Auction storage _auction = auction;
+    function joinAuction(address _auctioneer, uint _price)  
+        public payable 
+        inParticipationTime()
+        haveEnoughToken(_auctioneer, _price)  
+        returns(bool)  
+        {
+        require(_auctioneer != finalAuctioneer, "already final Auctioneer.");
+        Auction storage _auction = auction[0];
         //deposit 개념 미 적용
         //옥션참가자가 
         if( _price > _auction.currentPrice){
-            participationPrice[msg.sender] = _price;
-            auctioneer[auctioneerCount] = msg.sender;
-            auctioneerCount.add(1);
+            //gpaToken.transferFrom(_auctioneer, _estateAuction, 10); //해당 컨트랙트에 10gpaToken 보증금 개념으로 보냄.
+            participationPrice[_auctioneer] = _price;
+            auctioneer[auctioneerCount] = _auctioneer;
+            auctioneerCount++;
+            finalAuctioneer = _auctioneer;
             _auction.currentPrice = _price;
             return true;
         } else {
@@ -136,75 +148,134 @@ contract EstateAuction is Ownable {
 
 
     /*
-    //경매가 종료되고 입찰가 상위 3명 이외의 사람의 토큰 돌려주기?? -> 필요없음
-    function returnToken() public {
-        //경매가 종료 되었는지 확인
-        require(finishAuction, "Auction is not finished.");
-        //상위 3명을 제외한 사람들의 토큰 순차적으로 돌려주기
-        for (uint i = 0 ; i < auctioneer.length ; i++ ){
-            //transfer(to, value);// ??? HOW???
-        }
-    }
-    */
+    mapping(uint => address) finalAuctioneerList;
+    
 
-    address finalAuctioneer;
+    uint finalAuctioneerCount;
 
     //현재는 최종 낙찰자만...
-    function setFinalAuctioneer() public returns(bool) {
-        finalAuctioneer = auctioneer[auctioneerCount-1];
-    }
+    function setFinalAuctioneerList() public returns(bool) {
+        require(auctioneerCount > 0, "not auctioneer");
+        
+        finalAuctioneerList[0] = auctioneer[auctioneerCount-1];
+        finalAuctioneer = finalAuctioneerList[0];
+        uint cnt=1;
+        for(uint i=2; i<auctioneerCount; i++){
+            if(auctioneer[auctioneerCount-i] != finalAuctioneerList[cnt]){
+                finalAuctioneerList[cnt]=auctioneer[auctioneerCount-i];
+                cnt++;
+            }
 
-    // multi-sig ?
-    /*
-    function consensus() public {
-
-    }
-    */
-
-
-    //서로 승인하고 거래하기
-    //_price 거래되는 gpaToken 개수
-    //_tokenId 거래되는 estateId
-
-    
-    /*
-    function buyCard(uint _tokenId, uint _price) public returns (bool) {
-        require(itemFactory.getItemSellingAvailable(_tokenId)
-            && !(getOwnerOfToken(_tokenId) == msg.sender
-            && itemFactory.balanceOf(msg.sender) >= _price
-            ),"buyCard conditions not matched...");
-
-        gameToken.transferFrom(msg.sender, getOwnerOfToken(_tokenId), _price);
-
-        itemFactory.transferFrom(getOwnerOfToken(_tokenId), msg.sender, _tokenId);
-        emit BuyCard(msg.sender, getOwnerOfToken(_tokenId), _tokenId, _price, uint32(now));
+            if(cnt==3){
+                finalAuctioneerCount =cnt;
+                return true;
+            }
+        }
+        finalAuctioneerCount = cnt;
         return true;
     }
+
+    function getFinalAuctioneer(uint idx) public view returns(address){
+        return finalAuctioneerList[idx];
+    }
+
+    //수정 필요.
+    function setFinalAuctioneer() public returns(uint){
+        Auction storage _auction = auction;
+        if(_auction.endTime + 2 weeks < now && finalAuctioneerCount>2 ){
+            finalAuctioneer = finalAuctioneerList[2];
+            return 2;
+        }           
+        else if(_auction.endTime + 1 weeks < now && finalAuctioneerCount>1){
+            finalAuctioneer = finalAuctioneerList[1];
+            return 1;
+        }else {
+            return 0;
+        } 
+    }
     */
 
-    event completeAuctionn(address auctioneer, uint tokenId);
+    function getFinishAuction() public view returns(bool){
+        return finishAuction;
+    }
 
-    function tradingEstate(address _host, address _auctioneer, uint _tokenId, uint _price) public returns(bool) {
-        require( !(estateFactory.ownerOf(_tokenId) == _auctioneer)
-            &&  (gpaToken.balanceOf(_auctioneer) >= _price)
-            , "asdasdf...");
+    function getCompleteAuction() public view returns(bool) {
+        return completeAuction;
+    }
 
-        gpaToken.transferFrom(_auctioneer, _host, _price); 
+    function setCheckAuctioneer(address _auctioneer) public returns(bool) {
+        require(finishAuction==true,"Auction is not finished.");
+        require(_auctioneer == auctioneer[auctioneerCount-1], "not final auctioneer.");
         
-        estateFactory.transferFrom(_host, _auctioneer, _tokenId);
+        checkAuctioneer = true;
+        return true;
+    }
+
+    function getCheckAuctioneer() public view returns(bool, address){
+        return (checkAuctioneer, finalAuctioneer);
+    }
+
+    function setCheckOwner(address _owner) public returns(bool) {
+        require(finishAuction==true,"Auction is not finished.");
+        require(_owner == owner, "not owner.");
+
+        checkOwner = true;
+        return true;
+    }
+
+    function getCheckOwner() public view returns(bool) {
+        return checkOwner;
+    }
+
+    function getEstateAuctionSummury() public view returns(string memory, uint, uint, uint, uint){
+        Auction storage _auction = auction[0];
+        return (_auction.description, _auction.firstPrice, _auction.currentPrice, _auction.startTime, _auction.endTime);
+    }
+
+    /*
+    function getEstatAuctionDetail() public view returns(string memory, string memory, string memory, uint, bool){
+        Auction storage _auction = auction[0];
+        string memory estateOwnerName = estateFactory.estates[_auction.etstateId].estateOwner;
+        string memory estateName = estateFactory.estates[_auction.etstateId].estateName;
+        string memory estateAddr = estateFactory.estates[_auction.etstateId].estateAddr;
+        uint estateSize = estateFactory.estates[_auction.etstateId].estateSize;
+        bool estateAssurance = estateFactory.estates[_auction.etstateId].assurance;
+        return (estateOwnerName, estateName, estateAddr, estateSize, estateAssurance);
+    }
+    */
+
+    event completeAuctionEvent(address owner, address auctioneer, uint tokenId, uint price, uint32 time);
+
+    function tradingEstate(address _auctioneer, uint _tokenId, uint _price) public returns(bool) {
+        require(!(estateFactory.ownerOf(_tokenId) == _auctioneer), "estateId error.");  
+        require(gpaToken.balanceOf(_auctioneer) >= _price, "you don't have enough token."); // 금액이 부족하지 않은가?
+        require(_auctioneer == finalAuctioneer, "wrong auctioneer");    //최종 낙찰자 인가?
+        require(checkAuctioneer, "checkAuctionner is false.");
+        require(checkOwner, "checkOwner is false.");
+
+        gpaToken.transferFrom(_auctioneer, owner, _price); 
+        estateFactory.transferFrom(owner, _auctioneer, _tokenId);
         
-        //emit completeAuction(_auctioneer, _tokenId);
+        emit completeAuctionEvent(owner, _auctioneer, _tokenId, _price, uint32(now));
         return true;
     }
 
     //Auction 참가 종료시키기
-    function closingAution() public returns(bool) {
-        finishAuction = true;
+    
+    function closingAuction() public returns(bool) {
+        if(!canParticipate()){
+            finishAuction = true;
+            return true; //정상적으로 Auction 종료
+        }
+        else
+            return false; // Auction 종료x
+        
     }
+    
 
     //거래 완료
-    function completeAuction() public onlyOwner returns(bool) {
-        return complete = true;        
+    function setCompleteAuction() public returns(bool) {
+        return completeAuction = true;        
     }
 
     //참여가능한 옥션인가?
@@ -218,7 +289,7 @@ contract EstateAuction is Ownable {
 
     //옥션이 진행중에 있는지 확인하는 함수
     function canParticipate() public view returns (bool) {
-        Auction memory _auction = auction;
+        Auction memory _auction = auction[0];
         if( now >= _auction.startTime && now <= _auction.endTime ) {
             return true;
         } else {
@@ -226,5 +297,10 @@ contract EstateAuction is Ownable {
             return false;
         }
     }
+
+    modifier haveEnoughToken(address _auctioneer, uint _price) {
+        require(gpaToken.balanceOf(_auctioneer) >= _price);
+        _;
+    } 
 
 }
