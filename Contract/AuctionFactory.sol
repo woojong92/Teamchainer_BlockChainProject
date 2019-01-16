@@ -203,12 +203,28 @@ contract EstateAuction is Ownable {
         return completeAuction;
     }
 
+    function getFianlAuctioneer() public view returns(address) {
+        return finalAuctioneer;
+    }
+
+    function setCheckManager(address _manager) public returns(bool) {
+        require(finishAuction==true,"Auction is not finished.");
+        require(manager == _manager, "not manager.");
+        
+        checkManager = true;
+        return checkManager;
+    }
+
+    function getCheckManager() public view returns(bool){
+        return checkManager;
+    }
+
     function setCheckAuctioneer(address _auctioneer) public returns(bool) {
         require(finishAuction==true,"Auction is not finished.");
         require(_auctioneer == auctioneer[auctioneerCount-1], "not final auctioneer.");
         
         checkAuctioneer = true;
-        return true;
+        return checkAuctioneer;
     }
 
     function getCheckAuctioneer() public view returns(bool, address){
@@ -220,16 +236,16 @@ contract EstateAuction is Ownable {
         require(_owner == owner, "not owner.");
 
         checkOwner = true;
-        return true;
+        return checkOwner;
     }
 
     function getCheckOwner() public view returns(bool) {
         return checkOwner;
     }
 
-    function getEstateAuctionSummury() public view returns(string memory, uint, uint, uint, uint){
+    function getEstateAuctionSummary() public view returns(string memory, uint, uint, uint, uint, uint){
         Auction storage _auction = auction[0];
-        return (_auction.description, _auction.firstPrice, _auction.currentPrice, _auction.startTime, _auction.endTime);
+        return (_auction.description, _auction.estateId, _auction.firstPrice, _auction.currentPrice, _auction.startTime, _auction.endTime);
     }
 
     /*
@@ -244,20 +260,36 @@ contract EstateAuction is Ownable {
     }
     */
 
+    /*
+        function buyCard(uint _tokenId, uint _price) public returns (bool) {
+        require(itemFactory.getItemSellingAvailable(_tokenId)
+            && !(getOwnerOfToken(_tokenId) == msg.sender
+            && itemFactory.balanceOf(msg.sender) >= _price
+            ),"buyCard conditions not matched...");
+
+
+       gameToken.transferFrom(msg.sender, getOwnerOfToken(_tokenId), _price);
+
+        itemFactory.transferFrom(getOwnerOfToken(_tokenId), msg.sender, _tokenId);
+    */
+
     event completeAuctionEvent(address owner, address auctioneer, uint tokenId, uint price, uint32 time);
 
-    function tradingEstate(address _auctioneer, uint _tokenId, uint _price) public returns(bool) {
-        require(!(estateFactory.ownerOf(_tokenId) == _auctioneer), "estateId error.");  
-        require(gpaToken.balanceOf(_auctioneer) >= _price, "you don't have enough token."); // 금액이 부족하지 않은가?
-        require(_auctioneer == finalAuctioneer, "wrong auctioneer");    //최종 낙찰자 인가?
-        require(checkAuctioneer, "checkAuctionner is false.");
-        require(checkOwner, "checkOwner is false.");
-
-        gpaToken.transferFrom(_auctioneer, owner, _price); 
-        estateFactory.transferFrom(owner, _auctioneer, _tokenId);
+    function tradingEstate( uint _tokenId, uint _price) public returns(bool) {
+        require(!(getOwnerOfToken(_tokenId) == msg.sender), "estateId error.");  
+        require(gpaToken.balanceOf(msg.sender) >= _price, "you don't have enough token."); // 금액이 부족하지 않은가?
+        require(checkAuctioneer==true && checkOwner==true && checkManager==true, "check is false.");
+  
+        gpaToken.transferFrom(msg.sender, getOwnerOfToken(_tokenId), _price); 
+        estateFactory.transferFrom(getOwnerOfToken(_tokenId), msg.sender, _tokenId);
         
-        emit completeAuctionEvent(owner, _auctioneer, _tokenId, _price, uint32(now));
+        completeAuction = true;
+        emit completeAuctionEvent(owner, msg.sender, _tokenId, _price, uint32(now));
         return true;
+    }
+
+    function getOwnerOfToken(uint _tokenId) public view returns (address) {
+        return estateFactory.ownerOf(_tokenId);
     }
 
     //Auction 참가 종료시키기
@@ -274,9 +306,11 @@ contract EstateAuction is Ownable {
     
 
     //거래 완료
+    /*
     function setCompleteAuction() public returns(bool) {
         return completeAuction = true;        
     }
+    */
 
     //참여가능한 옥션인가?
     modifier inParticipationTime() {
