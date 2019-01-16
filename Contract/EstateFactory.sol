@@ -1058,6 +1058,7 @@ contract EstateFactory is Token721 {
     function estateTransferFrom(address _from, address _to, uint256 _tokenId) public{
         transferFrom(_from, _to, _tokenId);
         estatesOwner[_tokenId] = _to;
+        ownerApplyEstatesCount[_from].sub(1);
         
     }
 }

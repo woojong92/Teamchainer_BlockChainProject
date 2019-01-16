@@ -231,6 +231,8 @@ contract EstateAuction is Ownable {
         return (checkAuctioneer, finalAuctioneer);
     }
 
+    //function approve(address _to, uint256 _tokenId) public;
+
     function setCheckOwner(address _owner) public returns(bool) {
         require(finishAuction==true,"Auction is not finished.");
         require(_owner == owner, "not owner.");
@@ -277,7 +279,7 @@ contract EstateAuction is Ownable {
 
     function tradingEstate( uint _tokenId, uint _price) public returns(bool) {
         require(!(getOwnerOfToken(_tokenId) == msg.sender), "estateId error.");  
-        require(gpaToken.balanceOf(msg.sender) >= _price, "you don't have enough token."); // 금액이 부족하지 않은가?
+        //require(gpaToken.balanceOf(msg.sender) >= _price, "you don't have enough token."); // 금액이 부족하지 않은가?
         require(checkAuctioneer==true && checkOwner==true && checkManager==true, "check is false.");
   
         gpaToken.transferFrom(msg.sender, getOwnerOfToken(_tokenId), _price); 
