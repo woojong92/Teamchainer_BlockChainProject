@@ -218,7 +218,7 @@ contract EstateAuction is Ownable {
         emit completeAuctionEvent(owner, msg.sender, _tokenId, _price, uint32(now));
         return true;
     }
-    *//
+    */
 
 
     function tradingEstate( uint _tokenId, uint _price) public returns(bool) {
