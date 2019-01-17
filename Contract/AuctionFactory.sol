@@ -205,8 +205,24 @@ contract EstateAuction is Ownable {
 
     event completeAuctionEvent(address owner, address auctioneer, uint tokenId, uint price, uint32 time);
 
+    /*
+    function tradingEstate(address _owner, address _auctioneer, uint _tokenId, uint _price) public returns(bool) {
+       
+        require(gpaToken.balanceOf(msg.sender) >= _price, "you don't have enough token."); // 금액이 부족하지 않은가?
+        require(checkAuctioneer==true && checkOwner==true && checkManager==true, "check is false.");
+  
+        gpaToken.transferFrom(_auctioneer, _owner, _price); 
+        estateFactory.transferFrom(_owner, _auctioneer, _tokenId); //estateTransferFrom으로 교체 예정
+        
+        completeAuction = true;
+        emit completeAuctionEvent(owner, msg.sender, _tokenId, _price, uint32(now));
+        return true;
+    }
+    *//
+
+
     function tradingEstate( uint _tokenId, uint _price) public returns(bool) {
-        //require(!(getOwnerOfToken(_tokenId) == msg.sender), "estateId error.");  
+         
         //require(gpaToken.balanceOf(msg.sender) >= _price, "you don't have enough token."); // 금액이 부족하지 않은가?
         require(checkAuctioneer==true && checkOwner==true && checkManager==true, "check is false.");
   
