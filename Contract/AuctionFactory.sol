@@ -147,54 +147,6 @@ contract EstateAuction is Ownable {
     }
 
 
-    /*
-    mapping(uint => address) finalAuctioneerList;
-    
-
-    uint finalAuctioneerCount;
-
-    //현재는 최종 낙찰자만...
-    function setFinalAuctioneerList() public returns(bool) {
-        require(auctioneerCount > 0, "not auctioneer");
-        
-        finalAuctioneerList[0] = auctioneer[auctioneerCount-1];
-        finalAuctioneer = finalAuctioneerList[0];
-        uint cnt=1;
-        for(uint i=2; i<auctioneerCount; i++){
-            if(auctioneer[auctioneerCount-i] != finalAuctioneerList[cnt]){
-                finalAuctioneerList[cnt]=auctioneer[auctioneerCount-i];
-                cnt++;
-            }
-
-            if(cnt==3){
-                finalAuctioneerCount =cnt;
-                return true;
-            }
-        }
-        finalAuctioneerCount = cnt;
-        return true;
-    }
-
-    function getFinalAuctioneer(uint idx) public view returns(address){
-        return finalAuctioneerList[idx];
-    }
-
-    //수정 필요.
-    function setFinalAuctioneer() public returns(uint){
-        Auction storage _auction = auction;
-        if(_auction.endTime + 2 weeks < now && finalAuctioneerCount>2 ){
-            finalAuctioneer = finalAuctioneerList[2];
-            return 2;
-        }           
-        else if(_auction.endTime + 1 weeks < now && finalAuctioneerCount>1){
-            finalAuctioneer = finalAuctioneerList[1];
-            return 1;
-        }else {
-            return 0;
-        } 
-    }
-    */
-
     function getFinishAuction() public view returns(bool){
         return finishAuction;
     }
@@ -250,40 +202,16 @@ contract EstateAuction is Ownable {
         return (_auction.description, _auction.estateId, _auction.firstPrice, _auction.currentPrice, _auction.startTime, _auction.endTime);
     }
 
-    /*
-    function getEstatAuctionDetail() public view returns(string memory, string memory, string memory, uint, bool){
-        Auction storage _auction = auction[0];
-        string memory estateOwnerName = estateFactory.estates[_auction.etstateId].estateOwner;
-        string memory estateName = estateFactory.estates[_auction.etstateId].estateName;
-        string memory estateAddr = estateFactory.estates[_auction.etstateId].estateAddr;
-        uint estateSize = estateFactory.estates[_auction.etstateId].estateSize;
-        bool estateAssurance = estateFactory.estates[_auction.etstateId].assurance;
-        return (estateOwnerName, estateName, estateAddr, estateSize, estateAssurance);
-    }
-    */
-
-    /*
-        function buyCard(uint _tokenId, uint _price) public returns (bool) {
-        require(itemFactory.getItemSellingAvailable(_tokenId)
-            && !(getOwnerOfToken(_tokenId) == msg.sender
-            && itemFactory.balanceOf(msg.sender) >= _price
-            ),"buyCard conditions not matched...");
-
-
-       gameToken.transferFrom(msg.sender, getOwnerOfToken(_tokenId), _price);
-
-        itemFactory.transferFrom(getOwnerOfToken(_tokenId), msg.sender, _tokenId);
-    */
 
     event completeAuctionEvent(address owner, address auctioneer, uint tokenId, uint price, uint32 time);
 
     function tradingEstate( uint _tokenId, uint _price) public returns(bool) {
-        require(!(getOwnerOfToken(_tokenId) == msg.sender), "estateId error.");  
+        //require(!(getOwnerOfToken(_tokenId) == msg.sender), "estateId error.");  
         //require(gpaToken.balanceOf(msg.sender) >= _price, "you don't have enough token."); // 금액이 부족하지 않은가?
         require(checkAuctioneer==true && checkOwner==true && checkManager==true, "check is false.");
   
         gpaToken.transferFrom(msg.sender, getOwnerOfToken(_tokenId), _price); 
-        estateFactory.transferFrom(getOwnerOfToken(_tokenId), msg.sender, _tokenId);
+        estateFactory.transferFrom(getOwnerOfToken(_tokenId), msg.sender, _tokenId); //estateTransferFrom으로 교체 예정
         
         completeAuction = true;
         emit completeAuctionEvent(owner, msg.sender, _tokenId, _price, uint32(now));
@@ -306,6 +234,17 @@ contract EstateAuction is Ownable {
         
     }
     
+    // EstateId Approve 함수
+    function approveEstateId(address _owner, address _auctioneer, uint _estateId) public {
+        require(owner == _owner);
+        require(finalAuctioneer == _auctioneer);
+
+        estateFactory.approve(_auctioneer, _estateId);
+    }
+
+    function getApprovedEstateId(uint _estateId) public view returns(address) {
+        return estateFactory.getApproved(_estateId);
+    }
 
     //거래 완료
     /*
