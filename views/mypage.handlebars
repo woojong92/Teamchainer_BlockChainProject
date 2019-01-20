@@ -3,11 +3,43 @@
     <a href="/mypage">MyPage</a>
     <a href="/process/logout">로그아웃</a>
     <a href="/listuser">리스트유저</a>
-    <h3> 내가 등록한 지갑 주소: {{session.user.walletAddr}} </h3>
+    
+    <h2> 내가 등록한 지갑 주소: {{session.user.walletAddr}} </h2>
     <div id="walletCheck"></div>
+
+    
+    <div id="gpa_balance"> 
+        <h3>내가 가진 GpaToken:  
+        <text id="current_gpa_balance"></text> </h3>   
+    </div><br/>
+
+    
+    
+    <div><br/>
+        <h3>부동산 신청하기</h3>
+        <div>
+            <label for="estateOwner">부동산 소유주:</label>
+            <input type="text" id="estateOwner" />
+        </div>
+        <div>
+            <label for="estateName">부동산 이름:</label>
+            <input type="text" id="estateName" />
+        </div>
+        <div>
+            <label for="estateAddr">부동산 위치:</label>
+            <input type="text" id="estateAddr" />
+        </div>
+        <div>
+            <label for="estateSize">부동산 크기:</label>
+            <input type="text" id="estateSize" />
+        </div>
+        <button type="button" onClick="applyEstate();">전송</button>
+    </div><br/>
+
 
     <script>
         var userAccount;
+        var sessionAccount;
         var ownerEstatesBalance;
 
         function startApp() {
@@ -29,17 +61,30 @@
             var accountInterval = setInterval( function(){
                 if ( ethereum.selectedAddress != userAccount) {
                     userAccount = ethereum.selectedAddress;
-
+                    sessionAccount = {{session.user.walletAddr}} ;
+                    console.log(sessionAccount);
                     ownerEstatesBalance = getOwnerBalnceOf(userAccount);
 
                     if( {{session.user.walletAddr}} == userAccount){
-                         $("#walletCheck").text("등록한 지갑 주소와 메타마스크의 Account가 같습니다.")
+                       
+                        $("#walletCheck").text("등록한 지갑 주소와 메타마스크의 Account가 같습니다.");
+                        //$("#gpa_balance").text();
+                        getGpaBalanceOf(userAccount)
+                        .then( function(result){
+                            $("#current_gpa_balance").text(result);
+                        });
 
                         getEstateByOwner(userAccount)
                         .then(displayEstates);
 
                         getNotApprovalEstate(userAccount)
                         .then(displayNotApprovalEstates);
+
+                        //$("current_gpa_balance").text(getGpaBalanceOf(userAccount));
+                       
+                        
+                         
+ 
                     }else {
                         $("#walletCheck").text("등록한 지갑 주소와 메타마스크의 Account가 틀립니다.")
                     }
@@ -104,6 +149,21 @@
 
         function getEstateDetails(id){
             return EstateFactoryContract.methods.estates(id).call();
+        }
+
+        function getGpaBalanceOf(_owner) {
+            return GpaTokenContract.methods.balanceOf(_owner).call();
+        }
+
+        function applyEstate(){
+            var estateOwner = document.getElementById("estateOwner").value
+            var estateName = document.getElementById("estateName").value
+            var estateAddr = document.getElementById("estateAddr").value
+            var estateSize = document.getElementById("estateSize").value
+            return EstateFactoryContract.methods.applyEstate(estateOwner, estateName, estateAddr, estateSize)
+            .send({
+                from: userAccount
+            });
         }
 
 
