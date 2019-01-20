@@ -28,25 +28,25 @@ contract AuctionFactory {
     event NewAuction();
 
     //EstateAuction 컨트랙트 생성
-    function createAuction(address _owner) public {
-        EstateAuction newEstateAuction = new EstateAuction(manager, _owner, estateFactory, gpaToken); //msg.sender: Auction 사용자의 주소로 변경
+    function createAuction(address _auctionOwner) public {
+        EstateAuction newEstateAuction = new EstateAuction(manager, _auctionOwner, estateFactory, gpaToken); //msg.sender: Auction 사용자의 주소로 변경
         uint id = estateAuctions.push(newEstateAuction)-1;
-        estateAuctionOwner[id] = _owner; 
-        ownerEstateAuctionCount[_owner]++;
+        estateAuctionOwner[id] = _auctionOwner; 
+        ownerEstateAuctionCount[_auctionOwner]++;
         emit NewAuction();
     }
 
     // _owner가 생성한 옥션의 개수 반환
-    function getOwnerEstateAuctionCount(address _owner) public view returns(uint){
-        return ownerEstateAuctionCount[_owner];
+    function getOwnerEstateAuctionCount(address _auctionOwner) public view returns(uint){
+        return ownerEstateAuctionCount[_auctionOwner];
     }
 
     // _owner 가 생성한 옥션의 Idx 반환
-    function getAuctionByOwner(address _owner) public view returns(uint[] memory){
-        uint[] memory result = new uint[](ownerEstateAuctionCount[_owner]);
+    function getAuctionByOwner(address _auctionOwner) public view returns(uint[] memory){
+        uint[] memory result = new uint[](ownerEstateAuctionCount[_auctionOwner]);
         uint cnt = 0;
         for(uint i=0; i<estateAuctions.length; i++){
-            if(estateAuctionOwner[i] == _owner ){
+            if(estateAuctionOwner[i] == _auctionOwner ){
                 result[cnt] = i;
                 cnt++;
             }
@@ -90,17 +90,17 @@ contract EstateAuction is Ownable {
     Auction[] public auction;
     
     address public manager;     //AuctionFactory 컨트랙트 Owner 
-    address public owner;    //EstateAuction 컨트랙트 Owner 
+    address public auctionOwner;    //EstateAuction 컨트랙트 Owner 
     address finalAuctioneer;    //최종 낙찰자
 
     bool checkAuctioneer;
-    bool checkOwner;
+    bool checkAuctionOwner;
     bool checkManager;
 
     //EstateAuction 생성자
-    constructor(address _manager, address _owner, EstateFactory _estateFactory, GPAToken _gpaToken) public {
+    constructor(address _manager, address _auctionOwner, EstateFactory _estateFactory, GPAToken _gpaToken) public {
         manager = _manager; 
-        owner = _owner;
+        auctionOwner = _auctionOwner;
         estateFactory = _estateFactory; //ERC721 토큰 사용
         gpaToken = _gpaToken;   //ERC20 토큰 사용
     }
@@ -108,7 +108,7 @@ contract EstateAuction is Ownable {
     //Auction 생성
     function createAuction(string memory _description, uint _estateId, uint _firstPrice, uint _endTime) public {
         //_esteteId가 owner의 것인가 검사!!
-        require(estateFactory.ownerOf(_estateId) == owner,"not owner's estateId");
+        require(estateFactory.ownerOf(_estateId) == auctionOwner,"not owner's estateId");
         auction.push(Auction({
             description : _description,
             estateId : _estateId,
@@ -123,8 +123,8 @@ contract EstateAuction is Ownable {
     //Auction 참가하기
     //_price는 참가 토큰 개수
     //참가자 address?
-    function joinAuction(address _auctioneer, uint _price)  
-        public payable 
+    function joinAuction(address _auctioneer, uint _price)
+        public
         inParticipationTime()
         haveEnoughToken(_auctioneer, _price)  
         returns(bool)  
@@ -185,16 +185,16 @@ contract EstateAuction is Ownable {
 
     //function approve(address _to, uint256 _tokenId) public;
 
-    function setCheckOwner(address _owner) public returns(bool) {
+    function setCheckOwner(address _auctionOwner) public returns(bool) {
         require(finishAuction==true,"Auction is not finished.");
-        require(_owner == owner, "not owner.");
+        require(_auctionOwner == auctionOwner, "not owner.");
 
-        checkOwner = true;
-        return checkOwner;
+        checkAuctionOwner = true;
+        return checkAuctionOwner;
     }
 
     function getCheckOwner() public view returns(bool) {
-        return checkOwner;
+        return checkAuctionOwner;
     }
 
     function getEstateAuctionSummary() public view returns(string memory, uint, uint, uint, uint, uint){
@@ -203,7 +203,7 @@ contract EstateAuction is Ownable {
     }
 
 
-    event completeAuctionEvent(address owner, address auctioneer, uint tokenId, uint price, uint32 time);
+    event completeAuctionEvent(address auctionOwner, address auctioneer, uint tokenId, uint price, uint32 time);
 
     /*
     function tradingEstate(address _owner, address _auctioneer, uint _tokenId, uint _price) public returns(bool) {
@@ -224,15 +224,28 @@ contract EstateAuction is Ownable {
     function tradingEstate( uint _tokenId, uint _price) public returns(bool) {
          
         //require(gpaToken.balanceOf(msg.sender) >= _price, "you don't have enough token."); // 금액이 부족하지 않은가?
-        require(checkAuctioneer==true && checkOwner==true && checkManager==true, "check is false.");
+        require(checkAuctioneer==true && checkAuctionOwner==true && checkManager==true, "check is false.");
   
         gpaToken.transferFrom(msg.sender, getOwnerOfToken(_tokenId), _price); 
         estateFactory.transferFrom(getOwnerOfToken(_tokenId), msg.sender, _tokenId); //estateTransferFrom으로 교체 예정
         
         completeAuction = true;
-        emit completeAuctionEvent(owner, msg.sender, _tokenId, _price, uint32(now));
+        emit completeAuctionEvent(auctionOwner, msg.sender, _tokenId, _price, uint32(now));
         return true;
     }
+
+    function gpaTokenTransferFrom(uint _tokenId, uint _price) public returns(bool) {
+        gpaToken.transferFrom(msg.sender, getOwnerOfToken(_tokenId), _price);
+
+        return true;
+    }
+
+    function eestateFactoryTransferFrom(uint _tokenId) public returns(bool) {
+        estateFactory.transferFrom(getOwnerOfToken(_tokenId), msg.sender, _tokenId);
+
+        return true;
+    }
+
 
     function getOwnerOfToken(uint _tokenId) public view returns (address) {
         return estateFactory.ownerOf(_tokenId);
@@ -251,8 +264,8 @@ contract EstateAuction is Ownable {
     }
     
     // EstateId Approve 함수
-    function approveEstateId(address _owner, address _auctioneer, uint _estateId) public {
-        require(owner == _owner);
+    function approveEstateId(address _auctioneer, uint _estateId) public {
+        require(auctionOwner == msg.sender);  //msg.sender는 estateId 주인
         require(finalAuctioneer == _auctioneer);
 
         estateFactory.approve(_auctioneer, _estateId);

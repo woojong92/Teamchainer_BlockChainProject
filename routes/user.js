@@ -38,8 +38,11 @@ var login = function(req, res) {
             if(docs){
                 console.dir(docs);
 
+                var _walletAddr = docs[0]._doc.wallet_address
+
                 req.session.user = {
                     id: paramId,
+                    walletAddr: _walletAddr,
                     authorized: true
                 }
                 console.log(req.session.user);
@@ -152,7 +155,8 @@ var listuser = function(req, res) {
                 for( var i = 0 ; i< results.length; i++) {
                     var curId = results[i]._doc.id;
                     var curName = results[i]._doc.name;
-                    res.write(' <li>#'+i+' : ' + curId + ', ' +curName + '</li>');
+                    var curWalletAddr = results[i]._doc.wallet_address;
+                    res.write(' <li>#'+i+' : ' + curId + ', ' +curName +', '+ curWalletAddr + '</li>');
                 }
 
                 res.write('</ul></div>');

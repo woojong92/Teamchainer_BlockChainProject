@@ -29,8 +29,8 @@ router.post('/transfer', controller.transfer);
 router.post('/transferFrom', controller.transferFrom);
 
 // approve
-// router.post('/approve', controller.approve);
+router.post('/approve', controller.approve);
 
-router.post('/lockable', controller.lockable)
+//router.post('/lockable', controller.lockable)
 
 module.exports = router

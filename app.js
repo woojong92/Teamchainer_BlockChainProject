@@ -44,6 +44,9 @@ var crypto = require('crypto');
 //유저 관련 모듈 불러들이기
 var user = require('./routes/user');
 
+
+
+/****************************************************************************************/
 //데이터베이스 연결- password crypto
 function connectDB() {
     //데이터베이스 연결 정보
@@ -70,7 +73,6 @@ function connectDB() {
     });
 }
 
-
 // user 스키마 및 모델 객체 생성 - 모듈화
 function createUserSchema() {
 
@@ -84,6 +86,10 @@ function createUserSchema() {
     //init 호출
     user.init(database, UserSchema, UserModel);
 }
+/****************************************************************************************/
+
+
+
 
 //기본 속성 설정
 app.set('port', process.env.PORT || 3000);
@@ -119,7 +125,7 @@ app.use(function(req, res, next) {
     next();
 });
 
-
+/****************************************************************************************/
 //view engin
 var handlebars = require('express-handlebars').create({ 
     defaultLayout:'main',
@@ -133,6 +139,7 @@ var handlebars = require('express-handlebars').create({
 });
 app.engine('handlebars', handlebars.engine);
 app.set('view engine', 'handlebars');
+/****************************************************************************************/
 
 
 router.route('/process/login').post(user.login);
@@ -141,6 +148,7 @@ router.route('/process/listuser').post(user.listuser);
 router.route('/process/logout').get(user.logout);
 
 
+/*
 router.route('process/product').get(function(req, res){
     console.log('/process/product 호출됨.');
 
@@ -150,9 +158,14 @@ router.route('process/product').get(function(req, res){
         res.redirect('public/login.html');
     }
 })
+*/
+
+
+
+
+
 
 app.get('/', function(req, res){
-
     res.render('home');
 });
 
@@ -168,11 +181,18 @@ app.get('/mypage', function(req, res) {
     res.render('mypage');
 })
 
+app.get('/listuser', function(req, res) {
+    res.render('listuser');
+})
+
 /*
 app.get('/login', function(req, res){
     res.render('login');
 })*/
 
+
+
+/****************************************************************************************/
 // 커스텀 404 페이지
 app.use(function(req, res){
     res.status(404);
@@ -185,7 +205,10 @@ app.use(function(err, req, res, next){
     res.status(500);
     res.render('500')
 });
+/****************************************************************************************/
 
+
+/****************************************************************************************/
 app.listen(app.get('port'), function(){
     console.log('Express started on http://localhost:' +
         app.get('port')+'; press Ctrl-C to terminate.')
@@ -193,7 +216,7 @@ app.listen(app.get('port'), function(){
     //데이터베이스 연결
     connectDB();
 });
-
+/****************************************************************************************/
 
 /*
 function getWeatherData(){

@@ -10,9 +10,10 @@
     </head>
     <body>
         <a href="/"><h1>Welcome to Estate Auction</h1></a>
-        
+
         {{{body}}}    
-        
+
+        {{!
         <script>
         var userAccount;
         var ownerEstatesBalance;
@@ -31,9 +32,8 @@
 
 
                 EstateFactoryContract = new web3js.eth.Contract(EstateFactory_ABI, EstateFactory_ADDRESS);
-                //EstateFactoryContract = new web3.eth.Contract(EstateFactory_ABI, EstateFactory_ADDRESS);
                 AuctionFactoryContract = new web3js.eth.Contract(AuctionFactory_ABI, AuctionFactory_ADDRESS);
-                
+
                 /*
                 var accountInterval = setInterval( function(){
                     if (window.web3.eth.accounts[0] != userAccount) {
@@ -42,30 +42,29 @@
                 }, 100);
                 */
                 
-
+                
                 var accountInterval = setInterval( function(){
                     if ( ethereum.selectedAddress != userAccount) {
                         userAccount = ethereum.selectedAddress;
-                        
-                        
+
                         ownerEstatesBalance = getOwnerBalnceOf(userAccount);
 
-                         getEstateByOwner(userAccount)
+                        getEstateByOwner(userAccount)
                         .then(displayEstates);
-           
                     }
                 }, 100);
 
                 
-               
-               EstateFactoryContract.events.Transfer({filter: {to: userAccount}})
+            
+               EstateFactoryContract.events.Transfer({filter: {to: userAccount} })
                .on("data", function(event){
                    let data = event.returnValue;
 
                    getEstateByOwner(userAccount)
                    .then(displayEstates);
                    
-               }).on("error", console.error );      
+               }).on("error", console.error );     
+            
             
             }
 
@@ -73,7 +72,6 @@
                 return EstateFactoryContract.methods.getEstatesByOwner(_owner).call();
             }
             
-
             function getTokenOfOwnerByIndex(_owner, _index){
                 return EstateFactoryContract.methods.tokenOfOwnerByIndex(_owner, _index).call();
             }
@@ -105,55 +103,25 @@
             window.addEventListener('load', function() {
                 //Web3가 브라우저에 주입되었는가? (mist/metamask)
                 //typeof web3 !== 'undefined'
-
                 if(window.web3){
                     // Mist/metaMask의 프로바이더 사용
-                    
                     //var web3 = new Web3(new Web3.providers.WebsocketProvider("wss://mainnet.infura.io/ws"));
                     window.web3js = new Web3(web3.currentProvider);
                     //web3js = new Web3(web3.currentProvider);
                     console.log('metaMask 프로바이더 사용');
+                    window.alert("메타마스트 사용함.")
                     //web3js = new Web3(new Web3.providers.WebsocketProvider("ws://localhost:7545")) //ganache 사용
                 } else {
                     // 사용자가 metamask를 설치하지 않은 경우에 대해 처리
                     // 사용자들에게 metamask를 설치하라는 등의 메시지
-                    alert("메타마스크를 설치하세요.");
+                    window.alert("메타마스크를 설치하세요.");
                 }
-                // 
-                startApp()
+                //startApp()
             })
-
+            
+        }}
         
         </script>
 
     </body>
 </html>
-{{!
-    window.addEventListener('load', async () => {
-        // Modern dapp browsers...
-        if (window.ethereum) {
-            window.web3 = new Web3(ethereum);
-            try {
-                // Request account access if needed
-                await ethereum.enable();
-                // Acccounts now exposed
-                web3.eth.sendTransaction({/* ... */});
-            } catch (error) {
-                // User denied account access...
-            }
-        }
-        // Legacy dapp browsers...
-        else if (window.web3) {
-            window.web3 = new Web3(web3.currentProvider);
-            // Acccounts always exposed
-            web3.eth.sendTransaction({/* ... */});
-        }
-        // Non-dapp browsers...
-        else {
-            console.log('Non-Ethereum browser detected. You should consider trying MetaMask!');
-        }
-        startApp()
-    });
-
-}}
- 
