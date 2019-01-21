@@ -14,7 +14,7 @@
         var ownerEstatesBalance;
 
         function startApp() {
-            const AuctionFactory_ADDRESS = "0x7c578abb2e19cf603de23187dfa9191789d17d65"; //AuctionFactory 컨트랙트 주소
+            const AuctionFactory_ADDRESS = "0x3cb3ad49413e865d8bdc3ef996b2741fb56e0310"; //AuctionFactory 컨트랙트 주소
             const AuctionFactory_ABI = [{"constant":true,"inputs":[],"name":"gpaToken","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"getEstateAuctions","outputs":[{"name":"","type":"address[]"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"manager","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"estateFactory","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_auctionOwner","type":"address"}],"name":"getAuctionByOwner","outputs":[{"name":"","type":"uint256[]"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_auctionOwner","type":"address"}],"name":"getOwnerEstateAuctionCount","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_auctionOwner","type":"address"}],"name":"createAuction","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"inputs":[{"name":"_estateFactory","type":"address"},{"name":"_gpaToken","type":"address"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[],"name":"NewAuction","type":"event"}];
             AuctionFactoryContract = new web3js.eth.Contract(AuctionFactory_ABI, AuctionFactory_ADDRESS);
 
@@ -51,7 +51,7 @@
             for(id of ids) {
                 $("#Auctions").append(`<div class="auction">
                     <ul>
-                        <li><a href="/auction:${id}">옥션 : ${id}</a></li>
+                        <li><a href="/auction/${id}">${id}</a></li>
                     </ul>
                 </div>`);
             }
