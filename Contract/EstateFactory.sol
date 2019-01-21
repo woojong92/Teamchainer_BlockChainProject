@@ -980,10 +980,11 @@ contract EstateFactory is Token721 {
 
     //부동산에 대한 구조체
     struct Estate{
+        uint256 estateId;
         string  estateOwner;   //부동산 소유주 이름
         string  estateName;     //부동산 명
         string  estateAddr;     //부동산 주소
-        uint    estateSize;     //부동산 크기
+        string    estateSize;     //부동산 크기
         bool    assurance;      //보증   
     }
 
@@ -998,8 +999,9 @@ contract EstateFactory is Token721 {
     event NewApplyEstate(uint _id, string _estateOwner, string _estateName, string _estateAddr);
 
     //부동산 등록 신청
-    function applyEstate(string memory _ownerName, string memory _estateName, string memory _addr, uint _size) public {
-        uint id = estates.push(Estate(_ownerName, _estateName, _addr, _size, false))-1;
+    function applyEstate(string memory _ownerName, string memory _estateName, string memory _addr, string memory _size) public {
+        uint id = estates.push(Estate(0,_ownerName, _estateName, _addr, _size, false))-1;
+        estates[id].estateId = id;
         estatesOwner[id] = msg.sender;
         estatesApproval[id] = false;
         ownerApplyEstatesCount[msg.sender]++;
@@ -1055,10 +1057,8 @@ contract EstateFactory is Token721 {
         baseURI = _uri;
     }
 
-    function estateTransferFrom(address _from, address _to, uint256 _tokenId) public{
+    function estateTransferFrom (address _from, address _to, uint256 _tokenId) public{
         transferFrom(_from, _to, _tokenId);
         estatesOwner[_tokenId] = _to;
-        ownerApplyEstatesCount[_from].sub(1);
-        
     }
 }
