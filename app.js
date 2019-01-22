@@ -160,11 +160,6 @@ router.route('process/product').get(function(req, res){
 })
 */
 
-
-
-
-
-
 app.get('/', function(req, res){
     res.render('home');
 });
@@ -185,27 +180,14 @@ app.get('/listuser', function(req, res) {
     res.render('listuser');
 })
 
-app.get(['/auction', '/auction/id'], function(req, res){
+app.get(['/auction/:id?'], function(req, res){
     var id = req.params.id;
     res.render('auction', {auctionAddr: id});
-
-    /*
-      if(id){
-        //id값이 있을 때
-        fs.readFile('data/'+id, 'utf8', function(err, data){
-          if(err){
-            console.log(err);
-            res.status(500).send('Internal Server Error');
-          }
-          res.render('view', {topics: files, title: id, description: data});
-        })
-      }else{
-        //id값이 없을 때
-        res.render('view', {topics: files, title: 'Welcom!', description: 'Hello, Node!'});
-      }
-    */
 })
   
+app.get('/createAuction/:id?', function(req, res){
+    res.render('crateAuction');
+})
 
 /*
 app.get('/login', function(req, res){
@@ -216,6 +198,7 @@ app.get('/login', function(req, res){
 
 /****************************************************************************************/
 // 커스텀 404 페이지
+
 app.use(function(req, res){
     res.status(404);
     res.render('404');
@@ -227,6 +210,7 @@ app.use(function(err, req, res, next){
     res.status(500);
     res.render('500')
 });
+
 /****************************************************************************************/
 
 

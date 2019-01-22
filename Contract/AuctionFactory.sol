@@ -155,7 +155,7 @@ contract EstateAuction {
         return completeAuction;
     }
 
-    function getFianlAuctioneer() public view returns(address) {
+    function getFinalAuctioneer() public view returns(address) {
         return finalAuctioneer;
     }
 
@@ -179,8 +179,8 @@ contract EstateAuction {
         return checkAuctioneer;
     }
 
-    function getCheckAuctioneer() public view returns(bool, address){
-        return (checkAuctioneer, finalAuctioneer);
+    function getCheckAuctioneer() public view returns(bool){
+        return checkAuctioneer;
     }
 
 

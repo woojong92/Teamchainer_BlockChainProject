@@ -13,22 +13,26 @@
         var sessionAccount;
         var ownerEstatesBalance;
         var currentTokenId;
+        //var closingDate;
 
         function startApp() {
             const EstateAuction_ADDRESS ="{{auctionAddr}}";
-            const EstateAuction_ABI =[{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"auction","outputs":[{"name":"description","type":"string"},{"name":"estateId","type":"uint256"},{"name":"firstPrice","type":"uint256"},{"name":"currentPrice","type":"uint256"},{"name":"startTime","type":"uint256"},{"name":"endTime","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"getFinishAuction","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"getEstateAuctionSummary","outputs":[{"name":"","type":"string"},{"name":"","type":"uint256"},{"name":"","type":"uint256"},{"name":"","type":"uint256"},{"name":"","type":"uint256"},{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"getCheckAuctionOwner","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"getCheckAuctioneer","outputs":[{"name":"","type":"bool"},{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"gpaToken","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"manager","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_description","type":"string"},{"name":"_estateId","type":"uint256"},{"name":"_firstPrice","type":"uint256"},{"name":"_endTime","type":"uint256"}],"name":"createAuction","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"getCheckManager","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"estateFactory","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_tokenId","type":"uint256"}],"name":"getOwnerOfToken","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_auctionOwner","type":"address"}],"name":"setCheckAuctionOwner","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_manager","type":"address"}],"name":"setCheckManager","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"_estateId","type":"uint256"}],"name":"getApprovedEstateId","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"canParticipate","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_auctioneer","type":"address"}],"name":"setCheckAuctioneer","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_auctioneer","type":"address"},{"name":"_price","type":"uint256"}],"name":"joinAuction","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_auctionOwner","type":"address"},{"name":"_auctioneer","type":"address"},{"name":"_tokenId","type":"uint256"},{"name":"_price","type":"uint256"}],"name":"tradingEstate","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"auctionOwner","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[],"name":"closingAuction","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"getFianlAuctioneer","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"getCompleteAuction","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[{"name":"_manager","type":"address"},{"name":"_auctionOwner","type":"address"},{"name":"_estateFactory","type":"address"},{"name":"_gpaToken","type":"address"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"payable":true,"stateMutability":"payable","type":"fallback"},{"anonymous":false,"inputs":[{"indexed":false,"name":"auctionOwner","type":"address"},{"indexed":false,"name":"auctioneer","type":"address"},{"indexed":false,"name":"tokenId","type":"uint256"},{"indexed":false,"name":"price","type":"uint256"},{"indexed":false,"name":"time","type":"uint32"}],"name":"completeAuctionEvent","type":"event"}];
+            const EstateAuction_ABI =[{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"auction","outputs":[{"name":"description","type":"string"},{"name":"estateId","type":"uint256"},{"name":"firstPrice","type":"uint256"},{"name":"currentPrice","type":"uint256"},{"name":"startTime","type":"uint256"},{"name":"endTime","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"getFinishAuction","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"getEstateAuctionSummary","outputs":[{"name":"","type":"string"},{"name":"","type":"uint256"},{"name":"","type":"uint256"},{"name":"","type":"uint256"},{"name":"","type":"uint256"},{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"getCheckAuctionOwner","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"getCheckAuctioneer","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"gpaToken","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"getFinalAuctioneer","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"manager","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_description","type":"string"},{"name":"_estateId","type":"uint256"},{"name":"_firstPrice","type":"uint256"},{"name":"_endTime","type":"uint256"}],"name":"createAuction","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"getCheckManager","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"estateFactory","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_tokenId","type":"uint256"}],"name":"getOwnerOfToken","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_auctionOwner","type":"address"}],"name":"setCheckAuctionOwner","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_manager","type":"address"}],"name":"setCheckManager","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"_estateId","type":"uint256"}],"name":"getApprovedEstateId","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"canParticipate","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_auctioneer","type":"address"}],"name":"setCheckAuctioneer","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_auctioneer","type":"address"},{"name":"_price","type":"uint256"}],"name":"joinAuction","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_auctionOwner","type":"address"},{"name":"_auctioneer","type":"address"},{"name":"_tokenId","type":"uint256"},{"name":"_price","type":"uint256"}],"name":"tradingEstate","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"auctionOwner","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[],"name":"closingAuction","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"getCompleteAuction","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[{"name":"_manager","type":"address"},{"name":"_auctionOwner","type":"address"},{"name":"_estateFactory","type":"address"},{"name":"_gpaToken","type":"address"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"payable":true,"stateMutability":"payable","type":"fallback"},{"anonymous":false,"inputs":[{"indexed":false,"name":"auctionOwner","type":"address"},{"indexed":false,"name":"auctioneer","type":"address"},{"indexed":false,"name":"tokenId","type":"uint256"},{"indexed":false,"name":"price","type":"uint256"},{"indexed":false,"name":"time","type":"uint32"}],"name":"completeAuctionEvent","type":"event"}];
             EstateAuctionContract = new web3js.eth.Contract(EstateAuction_ABI, EstateAuction_ADDRESS);
 
             const GpaToken_ADDRESS = "0x27AE2362496588EA547bC801316F8958e08B2A28";
             const GpaToken_ABI = [{"constant":true,"inputs":[],"name":"name","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"spender","type":"address"},{"name":"value","type":"uint256"}],"name":"approve","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"totalSupply","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"from","type":"address"},{"name":"to","type":"address"},{"name":"value","type":"uint256"}],"name":"transferFrom","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"INITIAL_SUPPLY","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"decimals","outputs":[{"name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"spender","type":"address"},{"name":"addedValue","type":"uint256"}],"name":"increaseAllowance","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"owner","type":"address"}],"name":"balanceOf","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"symbol","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"spender","type":"address"},{"name":"subtractedValue","type":"uint256"}],"name":"decreaseAllowance","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"to","type":"address"},{"name":"value","type":"uint256"}],"name":"transfer","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"owner","type":"address"},{"name":"spender","type":"address"}],"name":"allowance","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"name":"from","type":"address"},{"indexed":true,"name":"to","type":"address"},{"indexed":false,"name":"value","type":"uint256"}],"name":"Transfer","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"owner","type":"address"},{"indexed":true,"name":"spender","type":"address"},{"indexed":false,"name":"value","type":"uint256"}],"name":"Approval","type":"event"}];
             GpaTokenContract = new web3js.eth.Contract(GpaToken_ABI, GpaToken_ADDRESS);
 
-            const EstateFactory_ADDRESS = "0x1d72106320c7349f212a430f23c3e52325f4939e"; //EstateFactory 컨트랙트 주소
+            const EstateFactory_ADDRESS = "0xd73d67588d22e6d0ab9c54d508a0be9edb9d508c"; //EstateFactory 컨트랙트 주소
             const EstateFactory_ABI = [{"constant":true,"inputs":[{"name":"_interfaceId","type":"bytes4"}],"name":"supportsInterface","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"name","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_tokenId","type":"uint256"}],"name":"getApproved","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_to","type":"address"},{"name":"_tokenId","type":"uint256"}],"name":"approve","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"_owner","type":"address"}],"name":"getNotApprovalEstate","outputs":[{"name":"","type":"uint256[]"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_tokenId","type":"uint256"},{"name":"_uri","type":"string"}],"name":"setTokenURI","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"totalSupply","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"InterfaceId_ERC165","outputs":[{"name":"","type":"bytes4"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_ownerName","type":"string"},{"name":"_estateName","type":"string"},{"name":"_addr","type":"string"},{"name":"_size","type":"string"}],"name":"applyEstate","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_from","type":"address"},{"name":"_to","type":"address"},{"name":"_tokenId","type":"uint256"}],"name":"transferFrom","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"_owner","type":"address"},{"name":"_index","type":"uint256"}],"name":"tokenOfOwnerByIndex","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_from","type":"address"},{"name":"_to","type":"address"},{"name":"_tokenId","type":"uint256"}],"name":"safeTransferFrom","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_tokenId","type":"uint256"}],"name":"burn","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"_tokenId","type":"uint256"}],"name":"exists","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_index","type":"uint256"}],"name":"tokenByIndex","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_tokenId","type":"uint256"}],"name":"ownerOf","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_owner","type":"address"}],"name":"balanceOf","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[],"name":"renounceOwnership","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"owner","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"symbol","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_id","type":"uint256"}],"name":"createEstate","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"tokenId","type":"uint256"}],"name":"mint","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_from","type":"address"},{"name":"_to","type":"address"},{"name":"_tokenId","type":"uint256"}],"name":"estateTransferFrom","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_to","type":"address"},{"name":"_approved","type":"bool"}],"name":"setApprovalForAll","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"_owner","type":"address"}],"name":"getEstatesByOwner","outputs":[{"name":"","type":"uint256[]"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_uri","type":"string"}],"name":"setTokenInfoURIBase","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_from","type":"address"},{"name":"_to","type":"address"},{"name":"_tokenId","type":"uint256"},{"name":"_data","type":"bytes"}],"name":"safeTransferFrom","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"_tokenId","type":"uint256"}],"name":"tokenURI","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"estates","outputs":[{"name":"estateId","type":"uint256"},{"name":"estateOwner","type":"string"},{"name":"estateName","type":"string"},{"name":"estateAddr","type":"string"},{"name":"estateSize","type":"string"},{"name":"assurance","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_owner","type":"address"},{"name":"_operator","type":"address"}],"name":"isApprovedForAll","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"anonymous":false,"inputs":[{"indexed":false,"name":"_id","type":"uint256"},{"indexed":false,"name":"_estateOwner","type":"string"},{"indexed":false,"name":"_estateName","type":"string"},{"indexed":false,"name":"_estateAddr","type":"string"}],"name":"NewApplyEstate","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"previousOwner","type":"address"}],"name":"OwnershipRenounced","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"previousOwner","type":"address"},{"indexed":true,"name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"_from","type":"address"},{"indexed":true,"name":"_to","type":"address"},{"indexed":true,"name":"_tokenId","type":"uint256"}],"name":"Transfer","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"_owner","type":"address"},{"indexed":true,"name":"_approved","type":"address"},{"indexed":true,"name":"_tokenId","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"_owner","type":"address"},{"indexed":true,"name":"_operator","type":"address"},{"indexed":false,"name":"_approved","type":"bool"}],"name":"ApprovalForAll","type":"event"}];
             EstateFactoryContract = new web3js.eth.Contract(EstateFactory_ABI, EstateFactory_ADDRESS);
 
             currentTokenId = EstateAuctionContract.methods.getEstateAuctionSummary().call().then(function(result){
                         return Number(result[1]);})
+
+            //closingDate = EstateAuctionContract.methods.getEstateAuctionSummary().call().then(function(result){
+            //            return Date(result[5]);})
 
             var accountInterval = setInterval( function(){
                 if ( ethereum.selectedAddress != userAccount) {
@@ -49,10 +53,55 @@
 
                         displayEstateAuctionSummary();
 
-
                         currentTokenId.then(displayEstateDetail);
                         
+                        getFinalAuctioneer().then( function(result){
+                            $("#finalAuctioneer1").text(result); 
+                            $("#finalAuctioneer2").text(result);   
+                        })
                         
+                        getFinishAuction().then(function(result) {
+                            if(result===true){
+                                $("#finishAuction").text("옥션이 종료되었습니다.");
+                            }else{
+                                $("#finishAuction").text("옥션 진행중.");
+                                canParticipate().then(function(participate) {
+                                    if(participate === false){
+                                        closingAuction();
+                                    }
+                                })
+                            }
+                        })
+
+                        getCheckAuctionOwner().then(function(result) {
+                            $("#CheckAuctionOwner").text(result);
+                        })
+
+                        getAuctionOwner().then(function(result) {
+                            $("#AuctionOwner").text(result);
+                        })
+
+                        getCheckAuctioneer().then(function(result) {
+                            $("#CheckAuctioneer").text(result);
+                        })
+
+                        getCheckManager().then(function(result) {
+                            $("#CheckManager").text(result);
+                        })
+
+                        getManager().then(function(result) {
+                            $("#Manager").text(result);
+                        })
+
+                        getCompleteAuction().then(function(result) {
+                            if(result == true){
+                                $("#complete").text("거래가 완료되었습니다.");        
+                            } else {
+                                $("#complete").text("거래가 완료되지 않았습니다."); 
+                            }
+                            
+                        })
+
 
                         //getEstateByOwner(userAccount)
                         //.then(displayEstates);
@@ -71,6 +120,20 @@
                 } 
 
             }, 100);
+        }
+
+        function crateEstateAuction(){
+            var description = document.getElementById("description").value
+            var estateId = document.getElementById("estateId").value
+            var firstPrice = document.getElementById("firstPrice").value
+            var endTime = document.getElementById("endTime").value
+            console.log(description, estateId, firstPrice, endTime);
+            
+            return EstateAuctionContract.methods.createAuction(description, estateId, firstPrice, endTime)
+            .send({
+                from: userAccount
+            });        
+            
         }
 
         //_owner가 소유하고 있는 estateId 반환
@@ -113,14 +176,16 @@
         function displayEstateAuctionSummary() {
             $("#EstateAuction").empty();
             getEstateAuctionSummary().then( function(auction) {
-                
-                 $("#EstateAuction").append(`<div class="auction">
+                var st = new Date(auction[4]*1000);
+                var et = new Date(auction[5]*1000);
+                $("#EstateAuction").append(`<div class="auction">
                     <ul>
                         <li>매물 설명: ${auction[0]}</li>
                         <li>토큰 id: ${auction[1]}</li>
                         <li>최초 입찰가격: ${auction[2]}</li>
                         <li>현재 입찰가격: ${auction[3]}</li>
-                        <li>옥션 마감시간: ${auction[4]}</li>
+                        <li>옥션 시작시간: ${st}</li>
+                        <li>옥션 마감시간: ${et}</li>
                     </ul>
                 </div>`);
             })
@@ -160,6 +225,8 @@
             }
         }
 
+
+
         function getEstateDetails(id){
             return EstateFactoryContract.methods.estates(id).call();
         }
@@ -185,21 +252,113 @@
             return EstateAuctionContract.methods.getEstateAuctionSummary().call();
         }
 
-        function joinAuction(_auctioneer, _price) {
-            return EstateAuctionContract.methods.joinAuction(_auctioneer, _price).send({from: userAccount});
+        function joinAuction() {
+            var _price = document.getElementById("_price").value
+            return EstateAuctionContract.methods.joinAuction(userAccount, _price).send({from: userAccount});
+        }
+
+        function getFinalAuctioneer() {
+            return EstateAuctionContract.methods.getFinalAuctioneer().call(); //오타 수정하기
+        }
+
+        function getCheckAuctionOwner() {
+            return EstateAuctionContract.methods.getCheckAuctionOwner().call();
+        }
+
+        function getCheckAuctioneer() {          
+            return EstateAuctionContract.methods.getCheckAuctioneer().call(); //컨트랙트 수정하기
+        }
+
+        function getCheckManager() {
+            return EstateAuctionContract.methods.getCheckManager().call();
+        }
+
+        function getFinishAuction() {
+            return EstateAuctionContract.methods.getFinishAuction().call();
+        }
+
+        function getCompleteAuction() {
+            return EstateAuctionContract.methods.getCompleteAuction().call();
+        }
+
+        function setCheckAuctionOwner() {
+            // approve 현재 컨트랙트 주소에 대해
+            estateIdApprove();
+            return EstateAuctionContract.methods.setCheckAuctionOwner(userAccount).send({from: userAccount});//.then(estateIdApprove);
+        }
+
+        function setCheckAuctioneer() {
+            // approve 현재 컨트랙트 주소에 대해
+            gpaTokenApprove();
+            return EstateAuctionContract.methods.setCheckAuctioneer(userAccount).send({from: userAccount});//.then(gpaTokenApprove);
+ 
+        }
+
+        function setCheckManager() {
+            return EstateAuctionContract.methods.setCheckManager(userAccount).send({from: userAccount});
+         }
+
+
+
+        function getAuctionOwner() {
+            return EstateAuctionContract.methods.auctionOwner().call();
+        }
+
+        function getManager() {
+            return EstateAuctionContract.methods.manager().call();
+        }
+
+        function tradingEstate() {
+ 
+            getFinalAuctioneer().then(function(_finalAuctioneer) {
+                var finalAuctioneer = _finalAuctioneer;
+                getAuctionOwner().then(function(_auctionOwner){
+                    var auctionOwner = _auctionOwner;
+                    getManager().then(function(_manager) {
+                        var manager = _manager;
+                        EstateAuctionContract.methods.getEstateAuctionSummary().call()
+                        .then(function(result){
+                            var estateId = Number(result[1]);
+                            var price = Number(result[3]);
+                            console.log("manager: "+manager+"auctionOwner: "+auctionOwner+"finalAuctioneer"+finalAuctioneer);
+                            console.log("estatId: "+estateId+ " price: "+ price);
+                            return EstateAuctionContract.methods
+                            .tradingEstate(auctionOwner, finalAuctioneer, estateId, price).send({from: manager});
+                        })
+                    })
+                })
+            })
         }
 
 
 
+        function closingAuction() {
+            getManager().then(function(result){
+                return EstateAuctionContract.methods.closingAuction().send({from: result});
+            })
+        }
 
+        function canParticipate() {
+            return EstateAuctionContract.methods.canParticipate().call();
+        }
 
+        /////////////////////////////
+        function estateIdApprove() {
+            console.log("{{auctionAddr}}");
+            EstateAuctionContract.methods.getEstateAuctionSummary().call().then(function(result){
+                return EstateFactoryContract.methods.approve("{{auctionAddr}}", Number(result[1]) )
+                .send({from: userAccount});        
+            })   
+        }    
 
-
-
-
-
-
-
+        ///////////////////////////////
+        function gpaTokenApprove() {
+            console.log("{{auctionAddr}}");
+            EstateAuctionContract.methods.getEstateAuctionSummary().call().then(function(result){
+                return GpaTokenContract.methods.approve("{{auctionAddr}}", (result[3] * 1e18).toString() ) //빅넘버 이슈
+                .send({from: userAccount});        
+            })              
+        }
 
         window.addEventListener('load', function() {
             //Web3가 브라우저에 주입되었는가? (mist/metamask)
@@ -227,8 +386,74 @@
     </script>
 {{/if}}
 
+<div><br/>
+    <h3>옥션 상세 정보 생성하기</h3>
+    <div>
+        <label for="description">옥션 설명:</label>
+        <input type="text" id="description" />
+    </div>
+    <div>
+        <label for="estateId">estateId:</label>
+        <input type="text" id="estateId" />
+    </div>
+    <div>
+        <label for="firstPrice">최소 희망가:</label>
+        <input type="text" id="firstPrice" />
+    </div>
+    <div>
+        <label for="endTime">옥션 종료일:</label>
+        <input type="text" id="endTime" /> (60: 1분뒤에 종료, 3600: 1시간 뒤에 종료)
+    </div>
+    <button type="button" onClick="crateEstateAuction();">전송</button>
+</div><br/>
+
 <h2>옥션 정보</h2>
 <div id = "EstateAuction"></div>
 
 <h2>매물 상세 정보</h2>
 <div id="EstatesDetail"></div>
+
+<h2>현재 낙찰자</h2>
+<div id="finalAuctioneer1"></div>
+
+<h2>옥션 종료 여부</h2>
+<div id="finishAuction"></div>
+
+<div><br/>
+    <h3>옥션 참여하기</h3>
+    <div>
+        <label for="price">참가 금액:</label>
+        <input type="text" id="_price" />
+    </div>
+    <button type="button" onClick="joinAuction();">전송</button>
+</div><br/>
+
+
+
+<div><br/>
+    <h3>최종 입찰자 확인</h3>
+    <div id="finalAuctioneer2"></div>
+    <div id="CheckAuctioneer"></div>
+    <button type="button" onClick="setCheckAuctioneer();">전송</button>
+</div><br/>
+
+<div><br/>
+    <h3>관리자 확인</h3>
+    <div id="Manager"></div>
+    <div id="CheckManager"></div>
+    <button type="button" onClick="setCheckManager();">전송</button>
+</div><br/>
+
+<div><br/>
+    <h3>옥션 주인 확인</h3>
+    <div id="AuctionOwner"></div>
+    <div id="CheckAuctionOwner"></div>  
+    <button type="button" onClick="setCheckAuctionOwner();">전송</button>
+</div><br/>
+
+<div><br/>
+    <h3>거래하기</h3>
+    <div id="complete"></div>  
+    <button type="button" onClick="tradingEstate();">전송</button>
+</div><br/>
+
