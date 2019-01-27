@@ -22,7 +22,7 @@ mongod --dbpath /Users/woojo/database/local
 mongo
 
 ## 스마트 컨트랙트 ##
-![Smartcontract](./image/Smartcontract.JPG)
+![SmartContract](./image/SmartContract.JPG)
 
 - 이번 프로젝트를 위해 총 4개의 스마트 컨트랙트를 만들었다.
 
@@ -34,12 +34,12 @@ mongo
 - 부동산 소유자가 applyEstate함수를 통해 자신이 소유한 부동산을 거래가 가능한 토큰으로 신청하면 인증기관(운영자)에서 여러 검증을 거치게 되며 createEstate함수를 통해 ERC721 표준 인터페이스 기준의 토큰으로 발행해 주게 되며, 이를 통해 부동산 거래가 가능하게 만들어 준다.    
 
 
-![Smartcontract](./image/EstateFactory.JPG)
+![EstateFactory](./image/EstateFactory.JPG)
 
 ### 3. AuctionFactory ###
 - AuctionFactory 스마트 컨트랙트는 부동산 경매를 신청하기 원하는 사용자에게 경매를 진행할 수 있는 EstateAuction 스마트 컨트랙트를 만들어 준다.
 
-![Smartcontract](./image/AuctionFactory.JPG)
+![AuctionFactory](./image/AuctionFactory.JPG)
 
 ### 4. EstateAuction ###
 - EstateAuction 스마트 컨트랙트는 부동산 경매가 진행되는 컨트랙트이다. 
@@ -48,4 +48,4 @@ mongo
 - closingAuction함수가 실행되면 더 이상 부동산 경매에 참여할 수 없게 되며, 최종 낙찰자와 EstateAuction 생성자, 관리자가 모두 확인을 해야한다.
 - 최종 낙찰자, 옥션 생성자, 관리자가 모두 확인을 하면 tradingEstate함수가 진행되며, 옥션 생성자의 ERC721로 된 부동산과 최종 낙찰자의 GPAToken이 거래된다. 
 
-![Smartcontract](./image/EstateAuction.JPG)
+![EstateAuction](./image/EstateAuction.JPG)
