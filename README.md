@@ -75,13 +75,23 @@ mongo
 - 현재 신청중인 부동산 자산을 확인 할 수 있다.
 - 자신이 소유한 현재 ERC721로 된 부동산 자산을 확인 할 수 있다.
 ### 1) 부동산 신청하기 ###
-사용자가 소유한 부동산을 거래가 가능한 ERC721 토큰 형태로 만들기 위해 인증기관에 신청한다. **EstateAuction -> applyEstate()**
+사용자가 소유한 부동산을 거래가 가능한 ERC721 토큰 형태로 만들기 위해 인증기관에 신청한다. **EstateFactory -> applyEstate()**
 ![applyEstate](./image/applyEstate.JPG)
 
 ### 2) 인증기관 승인 ###
-- 인증기관에서 신청한 부동산 자산을 검증했다고 가정하에, **EstateAuction -> createEstate()** 를 통해 ERC721 토큰으로 발행 후 소유주에게 전달한다.
+- 인증기관에서 신청한 부동산 자산을 검증했다고 가정하에, **EstateFactory -> createEstate()** 를 통해 ERC721 토큰으로 발행 후 소유주에게 전달한다.
 - 아래 그림에서 확인되는 것처럼 신청중인 부동산 자산이 소유하고 있는 부동산 자산으로 넘어가고 토큰id를 부여 받는다.
 
 ![createEstate](./image/createEstate.JPG)
 
 ----------
+
+## Auction 생성하기1 ##
+- Main화면의 옥션 생성하기에서 생성하기 버튼을 클릭하면 **AuctionFactory->createAuction()** 이 실행되면서 경매를 진행할 수 있는 **EstateAuction** 컨트랙트가 생성된다.
+- 아래  그림에서 확인되듯이 **진행 중인 옥션**에 추가된 **EstateAuction** 컨트랙트를 확인할 수 있다.
+
+![createAuction1](./image/createAuction1.JPG)
+
+## Auction 생성하기2 ##
+- 생성된 EstateAuction 주소를 클릭하여 EstateAuction을 만든 옥션 생성자는 옥션 상세 정보 생성하기를 통해 자신이 진행할 옥션을 만들수 있다. **EstateAuction -> createAcution()**
+![createAuction2](./image/createAuction2.JPG)
