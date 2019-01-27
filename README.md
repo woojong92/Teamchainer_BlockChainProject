@@ -65,7 +65,7 @@ mongo
 
 ## 로그인 ##
 #### 로그인 시 메타마스크의 Account와 등록한 Account가 같아야 한다. ####
-![login](./image/login.jpg)
+![login](./image/login.JPG)
 
 ----------
 
@@ -76,11 +76,12 @@ mongo
 - 자신이 소유한 현재 ERC721로 된 부동산 자산을 확인 할 수 있다.
 ### 1) 부동산 신청하기 ###
 사용자가 소유한 부동산을 거래가 가능한 ERC721 토큰 형태로 만들기 위해 인증기관에 신청한다. **EstateAuction -> applyEstate()**
-![applyEstate](./image/applyEstate.jpg)
+![applyEstate](./image/applyEstate.JPG)
 
 ### 2) 인증기관 승인 ###
 - 인증기관에서 신청한 부동산 자산을 검증했다고 가정하에, **EstateAuction -> createEstate()** 를 통해 ERC721 토큰으로 발행 후 소유주에게 전달한다.
 - 아래 그림에서 확인되는 것처럼 신청중인 부동산 자산이 소유하고 있는 부동산 자산으로 넘어가고 토큰id를 부여 받는다.
 
-![createEstate](./image/createEstate.jpg)
+![createEstate](./image/createEstate.JPG)
 
+----------
