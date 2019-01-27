@@ -49,3 +49,38 @@ mongo
 - 최종 낙찰자, 옥션 생성자, 관리자가 모두 확인을 하면 tradingEstate함수가 진행되며, 옥션 생성자의 ERC721로 된 부동산과 최종 낙찰자의 GPAToken이 거래된다. 
 
 ![EstateAuction](./image/EstateAuction.JPG)
+
+## 메타마스크를 통한 로그인 ##
+#### 브라우저 Web3js 라이브러리를 통해 MetaMask와 통신하여 사용자 인증  ####
+![metamask](./image/metamask.JPG)
+
+----------
+
+## 회원가입 ##
+#### 회원가입시 메타마스크의 EOA계정 등록  ####
+
+![signup](./image/signup.png)
+
+----------
+
+## 로그인 ##
+#### 로그인 시 메타마스크의 Account와 등록한 Account가 같아야 한다. ####
+![login](./image/login.jpg)
+
+----------
+
+## MyPage ##
+- MyPage에서는 내가 소유한 GpaToken을 확인 할 수 있다.
+- 소유한 부동산 자산을 ERC721로 신청 할 수 있다.
+- 현재 신청중인 부동산 자산을 확인 할 수 있다.
+- 자신이 소유한 현재 ERC721로 된 부동산 자산을 확인 할 수 있다.
+### 1) 부동산 신청하기 ###
+사용자가 소유한 부동산을 거래가 가능한 ERC721 토큰 형태로 만들기 위해 인증기관에 신청한다. **EstateAuction -> applyEstate()**
+![applyEstate](./image/applyEstate.jpg)
+
+### 2) 인증기관 승인 ###
+- 인증기관에서 신청한 부동산 자산을 검증했다고 가정하에, **EstateAuction -> createEstate()** 를 통해 ERC721 토큰으로 발행 후 소유주에게 전달한다.
+- 아래 그림에서 확인되는 것처럼 신청중인 부동산 자산이 소유하고 있는 부동산 자산으로 넘어가고 토큰id를 부여 받는다.
+
+![createEstate](./image/createEstate.jpg)
+
